@@ -18,13 +18,13 @@
     #btn-sair { background:#dc3545; }
     #btn-sair:hover { background:#b02a37; }
 
-    .devedor { background: #f8f9fa; padding: 10px; border-left: 5px solid #007bff; border-radius: 8px; margin-bottom: 10px; cursor:pointer; transition:0.3s; }
+    .devedor { background: #f8f9fa; padding: 10px; border-left: 5px solid #007bff; border-radius: 8px; margin-bottom: 10px; transition:0.3s; }
     .devedor strong { font-size: 16px; }
     .info { font-size: 13px; color: #555; margin: 6px 0 8px; }
 
     .actions { display:flex; gap:6px; align-items:center; flex-wrap: nowrap; }
     .actions .btn-devendo, .actions .btn-pago, .actions .btn-excluir {
-      padding: 6px 10px; border: none; border-radius: 6px; font-weight: 600; font-size: 13px; line-height: 1.1;
+      padding: 6px 10px; border: none; border-radius: 6px; font-weight: 600; font-size: 13px;
       flex: 0 0 auto; display: inline-flex; align-items: center; justify-content: center; gap:6px;
     }
     .btn-devendo { background-color: #000; color: white; cursor: pointer; }
@@ -36,13 +36,15 @@
     .whatsapp-btn {
       position: fixed; bottom: 15px; right: 15px; background-color: #25d366; color: white;
       border-radius: 50%; width: 56px; height: 56px; text-align: center; font-size: 30px;
-      box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 1000; cursor: pointer;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.2); z-index: 2000; cursor: pointer;
+      transition: transform 0.4s ease, opacity 0.4s ease;
     }
     .whatsapp-btn i { line-height: 56px; }
+    .whatsapp-btn.hidden { transform: translateY(120%); opacity: 0; pointer-events: none; }
 
     #btnSomar {
       display:none;
-      background:#ff9800;
+      background:#e68900;
       color:white;
       border:none;
       padding:10px 16px;
@@ -60,11 +62,12 @@
       width:100%;
       background:#fff8e1;
       border-top:2px solid #ff9800;
-      padding:10px 15px;
+      padding:12px 15px;
       box-shadow:0 -2px 6px rgba(0,0,0,0.15);
-      z-index:1000;
+      z-index:1500;
       font-family:'Segoe UI',sans-serif;
     }
+    #totalSoma { font-size:22px; color:#ff5722; font-weight:800; }
 
     @media (max-width: 480px) {
       .form-group { flex-direction: column; }
@@ -110,12 +113,12 @@
   </div>
 
   <div id="somaBar">
-    <div style="display:flex;justify-content:space-between;align-items:center;">
+    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
       <div>
         <strong>Selecionados:</strong>
         <span id="clientesSelecionados" style="color:#ff5722;font-weight:600;">0</span> |
         <strong>Total:</strong>
-        <span id="totalSoma" style="color:#ff5722;font-weight:700;">R$ 0,00</span>
+        <span id="totalSoma">R$ 0,00</span>
       </div>
       <div>
         <button id="menosBtn" style="background:#f44336;color:#fff;border:none;padding:6px 10px;border-radius:6px;cursor:pointer;">–</button>
@@ -126,7 +129,7 @@
     </div>
   </div>
 
-  <a href="https://wa.me/5583996323995" target="_blank" rel="noopener noreferrer" class="whatsapp-btn" aria-label="WhatsApp">
+  <a href="https://wa.me/5583996323995" target="_blank" rel="noopener noreferrer" class="whatsapp-btn" id="btnWhatsapp" aria-label="WhatsApp">
     <i class="fab fa-whatsapp"></i>
   </a>
 
@@ -198,12 +201,13 @@
       return (Date.now() - new Date(dataISO).getTime()) / (1000 * 60 * 60 * 24);
     }
 
-    // ======================== SOMA POR CLIENTE ========================
+    // ====== SOMA ======
     let modoSoma = false;
     let selecionados = new Set();
     let totalSoma = 0;
-
     const btnSomar = document.getElementById("btnSomar");
+    const btnWhats = document.getElementById("btnWhatsapp");
+
     btnSomar.addEventListener("click", () => {
       modoSoma = !modoSoma;
       selecionados.clear();
@@ -212,6 +216,7 @@
       document.getElementById("totalSoma").textContent = "R$ 0,00";
       document.getElementById("clientesSelecionados").textContent = "0";
       btnSomar.textContent = modoSoma ? "Encerrar Soma" : "Fazer Soma";
+      btnWhats.classList.toggle("hidden", modoSoma);
       atualizarLista();
     });
 
@@ -234,6 +239,7 @@
       modoSoma = false;
       document.getElementById("somaBar").style.display = "none";
       btnSomar.textContent = "Fazer Soma";
+      btnWhats.classList.remove("hidden");
     };
 
     document.getElementById("encerrarSoma").onclick = () => {
@@ -241,9 +247,10 @@
       selecionados.clear();
       document.getElementById("somaBar").style.display = "none";
       btnSomar.textContent = "Fazer Soma";
+      btnWhats.classList.remove("hidden");
       atualizarLista();
     };
-    // ================================================================
+    // ==================
 
     function atualizarLista() {
       const lista = document.getElementById("lista");
@@ -276,22 +283,28 @@
       const valorFmt = Number(d.valor).toFixed(2);
       const statusTxt = d.removida ? "Removida" : (d.pago ? "Pago" : "Devendo");
 
+      let botoes = "";
+      if (!modoSoma) {
+        botoes = d.pago
+          ? `<button class="btn-pago" disabled>Pago</button>`
+          : `<button class="btn-devendo" onclick="marcarPago('${d.id}')">Marcar Pago</button>`;
+        if (usuarioAtual === d.funcionario || usuarioAtual === "Vagner") {
+          botoes += ` <button class="btn-excluir" title="Excluir" onclick="excluir('${d.id}', ${d.removida})"><i class="fa-solid fa-trash"></i></button>`;
+        }
+      }
+
       div.innerHTML = `
         <strong>${d.nome}</strong> - R$ ${valorFmt} <small>(${statusTxt})</small>
         <div class="info">
           Anotado por: ${d.funcionario} em ${new Date(d.dataDevendo).toLocaleString()}
           ${d.pago ? `<br>Pago por: ${d.quemPagou} em ${new Date(d.dataPago).toLocaleString()}` : ``}
         </div>
-        <div class="actions">
-          ${d.pago ? `<button class="btn-pago" disabled>Pago</button>` :
-            `<button class="btn-devendo" onclick="marcarPago('${d.id}')">Marcar Pago</button>`}
-          ${(usuarioAtual === d.funcionario || usuarioAtual === "Vagner")
-            ? `<button class="btn-excluir" title="Excluir" onclick="excluir('${d.id}', ${d.removida})"><i class="fa-solid fa-trash"></i></button>` : ``}
-        </div>
+        <div class="actions">${botoes}</div>
         ${d.removida && !d.apagadaPorVagner ? `<div class="info"><em>Motivo: ${d.motivoExclusao || "Não informado"}</em></div>` : ""}
       `;
 
       if (modoSoma && !d.pago && !d.removida) {
+        div.style.cursor = "pointer";
         div.onclick = () => {
           if (selecionados.has(d.id)) {
             selecionados.delete(d.id);
@@ -306,6 +319,7 @@
           atualizarSomaUI();
         };
       }
+
       return div;
     }
 
