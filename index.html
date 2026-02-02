@@ -13,7 +13,7 @@
 
     body { font-family: 'Inter', sans-serif; background: var(--background); color: var(--text-main); margin: 0; padding: 20px 0 120px 0; overflow-x: hidden; }
     .container { max-width: 700px; margin: auto; background: var(--card-bg); padding: 24px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); }
-    h2 { text-align: center; font-weight: 800; color: var(--danger); margin-top: 0; }
+    h2 { text-align: center; font-weight: 800; color: var(--danger); margin: 0 0 15px 0; }
 
     .tabs { display: flex; gap: 8px; margin-bottom: 20px; background: #e2e8f0; padding: 5px; border-radius: 12px; }
     .tab { 
@@ -23,7 +23,7 @@
     }
     .tab.active { background: white; color: var(--primary); box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
 
-    .form-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+    .form-group { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
     input, select, .btn-main { padding: 12px; border-radius: 10px; border: 1px solid var(--border); font-size: 15px; outline: none; transition: 0.3s; }
     input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1); }
     .btn-main { background: var(--primary); color: white; font-weight: 600; cursor: pointer; border: none; }
@@ -79,7 +79,11 @@
 <body>
 
 <div class="container">
-    <h2><i class="fa-solid fa-triangle-exclamation"></i> Pendências de Caixa</h2>
+    <div style="display:flex; justify-content: space-between; align-items: center;">
+        <i class="fa-solid fa-magnifying-glass" style="color: var(--text-muted); font-size: 18px;"></i>
+        <h2>Pendências</h2>
+        <div style="width:18px"></div> 
+    </div>
 
     <div id="login-section" class="form-group">
         <select id="funcionario" style="flex:1">
@@ -93,29 +97,24 @@
         <button class="btn-main" onclick="acessarSistema()">Entrar</button>
     </div>
 
-    <div id="logado-msg" class="hidden" style="justify-content: space-between; align-items: center; margin-bottom: 20px; background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid var(--border);">
+    <div id="logado-msg" class="hidden" style="justify-content: space-between; align-items: center; margin-bottom: 15px; background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
         <span style="font-weight: 700;"><i class="fa-solid fa-circle-user" style="color:var(--primary)"></i> <span id="quem"></span></span>
-        <div style="display:flex; gap:10px;">
+        <div style="display:flex; gap:8px;">
             <button id="btnLixeira" class="btn-action hidden" onclick="abrirLixeira()"><i class="fa-solid fa-trash-can"></i></button>
-            <button class="btn-action" style="background:#fee2e2; color:#991b1b" onclick="sair()"><i class="fa-solid fa-power-off"></i></button>
+            <button class="btn-action" style="background:#fee2e2; color:#991b1b; padding: 8px 12px;" onclick="sair()"><i class="fa-solid fa-power-off"></i></button>
         </div>
     </div>
 
     <div id="area-restrita" class="hidden">
-        <button id="btnSomar" class="btn-main" style="width:100%; background: var(--warning); margin-bottom:15px; border-radius: 12px; height: 50px;">
-            <i class="fa-solid fa-calculator"></i> MODO SOMA
-        </button>
-
-        <div class="form-group" style="background: #fff5f5; padding: 15px; border-radius: 12px; border: 1px solid #feb2b2;">
+        <div class="form-group" style="background: #fff5f5; padding: 10px; border-radius: 12px; border: 1px solid #feb2b2; margin-bottom: 10px;">
             <input type="text" id="nomeCliente" placeholder="Nome do Cliente" style="flex:2">
             <input type="text" id="valorMask" placeholder="R$ 0,00" style="flex:1" oninput="mascaraMoeda(this)">
             <button class="btn-main" style="background: var(--danger)" onclick="adicionarDivida()">ANOTAR</button>
         </div>
-        
-        <div class="search-box">
-            <i class="fa-solid fa-magnifying-glass" style="position: absolute; left: 15px; top: 15px; color: var(--text-muted);"></i>
-            <input type="text" id="inputBusca" placeholder="Pesquisar cliente..." style="width:100%; padding-left:45px;" oninput="atualizarLista()">
-        </div>
+
+        <button id="btnSomar" class="btn-main" style="width:100%; background: var(--warning); margin-bottom:15px; border-radius: 12px; height: 45px; font-size: 14px;">
+            <i class="fa-solid fa-calculator"></i> MODO SOMA
+        </button>
 
         <div class="tabs">
             <button id="tabPendentes" class="tab active" onclick="setFiltro('pendente', this)">PENDENTES</button>
@@ -123,7 +122,7 @@
         </div>
 
         <div id="lista">
-            <div class="skeleton"></div><div class="skeleton"></div><div class="skeleton"></div>
+            <div class="skeleton"></div><div class="skeleton"></div>
         </div>
     </div>
 </div>
@@ -140,7 +139,8 @@
 
 <div id="somaBar">
     <div style="max-width:700px; margin:auto; display:flex; justify-content:space-between; align-items:center;">
-        <div><small style="color:#94a3b8">TOTAL SELECIONADO</small><br><strong id="totalSoma" style="font-size:26px; color:#4ade80">R$ 0,00</strong></div>
+        <div><small style="color:#94a3b8">TOTAL SELECIONADO</small><br>
+<strong id="totalSoma" style="font-size:26px; color:#4ade80">R$ 0,00</strong></div>
         <div style="display:flex; gap:12px;">
             <button class="btn-main" id="confirmarSoma" style="background:var(--success); padding: 15px 20px;">LIQUIDAR</button>
             <button class="btn-action" id="encerrarSoma" style="background:#475569; color:white">CANCELAR</button>
@@ -211,14 +211,12 @@
 
     window.atualizarLista = () => {
         const lista = document.getElementById("lista");
-        const busca = document.getElementById("inputBusca").value.toLowerCase();
         lista.innerHTML = "";
 
         const filtrados = devedores.filter(d => {
             if (d.removida) return false;
-            const bateNome = d.nome.toLowerCase().includes(busca);
             const bateFiltro = filtroAtual === 'pago' ? d.pago : !d.pago;
-            return bateNome && (bateFiltro || processandoIds.has(d.id));
+            return (bateFiltro || processandoIds.has(d.id));
         });
 
         filtrados.forEach(d => {
