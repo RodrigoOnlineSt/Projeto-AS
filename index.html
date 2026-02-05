@@ -196,6 +196,15 @@
         
         onSnapshot(query(collection(db, "dividas"), orderBy("dataDevendo", "desc")), (snap) => {
             devedores = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+
+            // ORDENAÇÃO POR DATA DE PAGAMENTO (Mais recente no topo na aba de pagos)
+            devedores.sort((a, b) => {
+                if (a.pago && b.pago) {
+                    return new Date(b.dataPago) - new Date(a.dataPago);
+                }
+                return 0; // Mantém ordem dataDevendo para os pendentes
+            });
+
             atualizarLista();
         });
     }
@@ -263,7 +272,7 @@
     window.acaoPagar = async (id) => {
         processandoIds.add(id);
         atualizarLista();
-        // RESTAURADO O DELAY DE 4 SEGUNDOS PARA FEEDBACK VISUAL
+        // DELAY DE 4 SEGUNDOS PARA FEEDBACK VISUAL
         setTimeout(async () => {
             try {
                 await updateDoc(doc(db, "dividas", id), { 
