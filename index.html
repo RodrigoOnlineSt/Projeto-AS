@@ -88,7 +88,7 @@
         max-width: 500px; margin: auto; background: white; border-radius: 20px; 
         padding: 20px; position: relative; max-height: 90vh; overflow-y: auto;
     }
-    .repasse-card { background: #fff7ed; border: 1px solid #fdba74; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
+    .repasse-card { background: #f0fdf4; border: 2px dashed #22c55e; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
     .extrato-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #f1f5f9; font-size: 11px; }
 
     .hidden { display: none !important; }
@@ -150,46 +150,63 @@
 </div>
 
 <div id="modalDesempenho" class="modal-full">
-    <div class="modal-content">
+    <div class="modal-content" style="max-width: 550px;">
         <div style="text-align:center; margin-bottom:15px;">
-            <h3 style="margin:0; font-size:18px;"><i class="fa-solid fa-cash-register" style="color:#2563eb"></i> Resumo de Caixa</h3>
+            <h3 style="margin:0; font-size:18px; color:var(--primary)"><i class="fa-solid fa-cash-register"></i> Relatório de Caixa</h3>
+            <p id="subtituloRelatorio" style="font-size:11px; color:var(--text-muted); margin:5px 0; font-weight: bold;"></p>
         </div>
         
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
             <div>
-                <label style="font-size:10px; font-weight:bold;">DE:</label>
-                <input type="date" id="dataInicio" style="width:100%;">
+                <label style="font-size:10px; font-weight:bold; color:var(--text-muted)">INÍCIO:</label>
+                <input type="date" id="dataInicio" style="width:100%; border: 1px solid #cbd5e1; padding: 5px; border-radius: 5px;">
             </div>
             <div>
-                <label style="font-size:10px; font-weight:bold;">ATÉ:</label>
-                <input type="date" id="dataFim" style="width:100%;">
+                <label style="font-size:10px; font-weight:bold; color:var(--text-muted)">FIM:</label>
+                <input type="date" id="dataFim" style="width:100%; border: 1px solid #cbd5e1; padding: 5px; border-radius: 5px;">
             </div>
         </div>
 
-        <div class="repasse-card">
-            <small style="font-weight:800; color:#c2410c; font-size:11px;">REPASSAR PARA O ADM (TOTAL RECEBIDO):</small>
-            <span id="resRepasse" style="color:#ea580c; font-size:32px; font-weight:900; display:block;">R$ 0,00</span>
+        <div id="filtroAdm" class="hidden" style="margin-bottom: 15px; padding: 10px; background: #f1f5f9; border-radius: 10px;">
+            <label style="font-size:10px; font-weight:800; color:var(--primary); display:block; margin-bottom:5px;">FILTRAR REPASSE DE:</label>
+            <select id="filtroFuncionarioAdm" onchange="calcularDesempenho()" style="width:100%; padding:8px; border-radius:8px; border:1px solid #cbd5e1;">
+                <option value="TODOS">--- TODOS OS RECEBIDOS ---</option>
+                <option value="Karolina">Karolina</option>
+                <option value="Rodrigo">Rodrigo</option>
+                <option value="Gabriela">Gabriela</option>
+                <option value="ADM">ADM</option>
+            </select>
         </div>
 
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-            <div style="border-left: 4px solid #ef4444; background:#f8fafc; padding:10px; border-radius:10px;">
-                <small style="font-size:10px; font-weight:800; color:#64748b">ANOTEI (FIADO):</small>
-                <span style="display:block; font-weight:900; color:#ef4444" id="resAnotado">R$ 0,00</span>
+        <div class="repasse-card" style="margin-bottom: 10px;">
+            <small id="labelRepasse" style="font-weight:800; color:#166534; font-size:10px; text-transform: uppercase;">TOTAL A REPASSAR (GERAL):</small>
+            <span id="resRepasse" style="color:#15803d; font-size:28px; font-weight:900; display:block;">R$ 0,00</span>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
+            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 10px; border-radius: 8px;">
+                <small style="font-size:9px; font-weight:800; color:#1d4ed8; text-transform:uppercase;">Próprios</small>
+                <span id="resRecebidoProprio" style="display:block; font-weight:900; color:#1e40af; font-size:14px;">R$ 0,00</span>
             </div>
-            <div style="border-left: 4px solid #22c55e; background:#f8fafc; padding:10px; border-radius:10px;">
-                <small style="font-size:10px; font-weight:800; color:#64748b">RECEBIDO TOTAL:</small>
-                <span style="display:block; font-weight:900; color:#22c55e" id="resRecebidoTotal">R$ 0,00</span>
+            <div style="background: #fff7ed; border-left: 4px solid #f97316; padding: 10px; border-radius: 8px;">
+                <small style="font-size:9px; font-weight:800; color:#c2410c; text-transform:uppercase;">De Terceiros</small>
+                <span id="resRecebidoOutros" style="display:block; font-weight:900; color:#9a3412; font-size:14px;">R$ 0,00</span>
             </div>
         </div>
 
-        <div style="padding: 10px 0;">
-            <small style="font-weight:800; color:#64748b; font-size:10px;">HISTÓRICO DO PERÍODO:</small>
-            <div id="extratoRecebidos" style="margin-top:5px; max-height: 200px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px;"></div>
+        <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 8px 10px; border-radius: 8px; margin-bottom: 10px;">
+            <small style="font-size:9px; font-weight:800; color:#991b1b; text-transform:uppercase;">Total que Anotou no Fiado</small>
+            <span id="resAnotado" style="display:block; font-weight:900; color:#b91c1c; font-size:14px;">R$ 0,00</span>
+        </div>
+
+        <div style="padding: 5px 0;">
+            <small style="font-weight:800; color:#64748b; font-size:10px;">EXTRATO DE RECEBIMENTOS:</small>
+            <div id="extratoRecebidos" style="margin-top:5px; max-height: 150px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; background:#fff;"></div>
         </div>
         
         <div style="display:flex; gap:10px; margin-top:15px;">
             <button onclick="document.getElementById('modalDesempenho').style.display='none'" style="flex:1; padding:12px; border-radius:8px; border:none; background:#64748b; color:white; font-weight:bold;">FECHAR</button>
-            <button id="btnHoje" style="flex:1; padding:12px; border-radius:8px; border:none; background:#2563eb; color:white; font-weight:bold;">HOJE</button>
+            <button id="btnHoje" style="flex:1; padding:12px; border-radius:8px; border:none; background:var(--primary); color:white; font-weight:bold;">HOJE</button>
         </div>
     </div>
 </div>
@@ -261,7 +278,10 @@
         document.getElementById("logado-msg").style.display = "flex";
         document.getElementById("area-restrita").classList.remove("hidden");
         document.getElementById("quem").innerText = usuarioLogado;
-        if(usuarioLogado === "Vagner") document.getElementById("btnLixeira").classList.remove("hidden");
+        if(usuarioLogado === "Vagner") {
+            document.getElementById("btnLixeira").classList.remove("hidden");
+            document.getElementById("filtroAdm").classList.remove("hidden");
+        }
         
         onSnapshot(query(collection(db, "dividas"), orderBy("dataDevendo", "desc")), (snap) => {
             devedores = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
@@ -284,13 +304,11 @@
     window.atualizarLista = () => {
         const lista = document.getElementById("lista");
         lista.innerHTML = "";
-
         const filtrados = devedores.filter(d => {
             if (d.removida) return false;
             const bateFiltro = filtroAtual === 'pago' ? d.pago : !d.pago;
             return (bateFiltro || processandoIds.has(d.id));
         });
-
         filtrados.forEach(d => {
             const card = document.createElement("div");
             const estaProcessando = processandoIds.has(d.id);
@@ -350,39 +368,72 @@
         calcularDesempenho();
     };
 
-    function calcularDesempenho() {
+    window.calcularDesempenho = () => {
         const inicio = new Date(document.getElementById('dataInicio').value + 'T00:00:00');
         const fim = new Date(document.getElementById('dataFim').value + 'T23:59:59');
         const extrato = document.getElementById('extratoRecebidos');
         extrato.innerHTML = "";
 
-        let totalAnotado = 0;
-        let totalRecebido = 0;
+        let totalAnotado = 0;       
+        let totalProprio = 0;       
+        let totalOutros = 0;        
+
+        const modoADM = (usuarioLogado === "Vagner");
+        let funcAlvo = modoADM ? document.getElementById('filtroFuncionarioAdm').value : usuarioLogado;
+        
+        document.getElementById('subtituloRelatorio').innerText = modoADM ? "PAINEL ADMINISTRATIVO" : `RELATÓRIO: ${usuarioLogado.toUpperCase()}`;
+        document.getElementById('labelRepasse').innerText = (modoADM && funcAlvo !== "TODOS") ? `REPASSE DE ${funcAlvo}:` : "TOTAL A REPASSAR (GERAL):";
 
         devedores.forEach(d => {
             if (d.removida) return;
             const dataCriacao = new Date(d.dataDevendo);
             const dataPagamento = d.pago ? new Date(d.dataPago) : null;
-            if (d.funcionario === usuarioLogado && dataCriacao >= inicio && dataCriacao <= fim) totalAnotado += d.valor;
-            if (d.pago && d.quemPagou === usuarioLogado && dataPagamento >= inicio && dataPagamento <= fim) {
-                totalRecebido += d.valor;
-                extrato.innerHTML += `<div class="extrato-item"><span>${d.nome}</span><strong style="color:var(--success)">+ R$ ${d.valor.toFixed(2)}</strong></div>`;
+
+            // Lógica de Soma de Anotações (Fiado feito no período)
+            // Se for ADM vendo "TODOS", soma tudo. Se selecionou alguém, soma só o que aquele alguém anotou.
+            if ((funcAlvo === "TODOS" || d.funcionario === funcAlvo) && dataCriacao >= inicio && dataCriacao <= fim) {
+                totalAnotado += d.valor;
+            }
+
+            // Lógica de Soma de Recebimentos (Dinheiro que entrou no período)
+            if (d.pago && (funcAlvo === "TODOS" || d.quemPagou === funcAlvo) && dataPagamento >= inicio && dataPagamento <= fim) {
+                const ehProprio = d.funcionario === d.quemPagou;
+                const cor = ehProprio ? "#2563eb" : "#f97316";
+                const bg = ehProprio ? "#eff6ff" : "#fff7ed";
+
+                if (ehProprio) totalProprio += d.valor;
+                else totalOutros += d.valor;
+
+                extrato.innerHTML += `
+                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #f1f5f9; background:${bg}; font-size:10px;">
+                        <div>
+                            <b style="color:${cor}">${d.nome}</b><br>
+                            <small style="color:#64748b">Anotado por: ${d.funcionario} | Rec. por: ${d.quemPagou}</small>
+                        </div>
+                        <div style="text-align:right">
+                            <strong style="color:${cor}">+ R$ ${d.valor.toFixed(2).replace('.', ',')}</strong><br>
+                            <small style="color:#94a3b8; font-size:9px;">${new Date(d.dataPago).toLocaleDateString('pt-BR')}</small>
+                        </div>
+                    </div>`;
             }
         });
 
+        const totalGeral = totalProprio + totalOutros;
         document.getElementById('resAnotado').innerText = "R$ " + totalAnotado.toFixed(2).replace('.', ',');
-        document.getElementById('resRecebidoTotal').innerText = "R$ " + totalRecebido.toFixed(2).replace('.', ',');
-        document.getElementById('resRepasse').innerText = "R$ " + totalRecebido.toFixed(2).replace('.', ',');
-        if (extrato.innerHTML === "") extrato.innerHTML = "<p style='font-size:10px; padding:10px; color:#64748b'>Nenhum recebimento.</p>";
-    }
+        document.getElementById('resRecebidoProprio').innerText = "R$ " + totalProprio.toFixed(2).replace('.', ',');
+        document.getElementById('resRecebidoOutros').innerText = "R$ " + totalOutros.toFixed(2).replace('.', ',');
+        document.getElementById('resRepasse').innerText = "R$ " + totalGeral.toFixed(2).replace('.', ',');
 
-    document.getElementById('dataInicio').onchange = calcularDesempenho;
-    document.getElementById('dataFim').onchange = calcularDesempenho;
+        if (extrato.innerHTML === "") extrato.innerHTML = "<p style='font-size:10px; padding:20px; color:#64748b; text-align:center;'>Sem dados no período.</p>";
+    };
+
+    document.getElementById('dataInicio').onchange = window.calcularDesempenho;
+    document.getElementById('dataFim').onchange = window.calcularDesempenho;
     document.getElementById('btnHoje').onclick = () => {
         const hoje = new Date().toISOString().split('T')[0];
         document.getElementById('dataInicio').value = hoje;
         document.getElementById('dataFim').value = hoje;
-        calcularDesempenho();
+        window.calcularDesempenho();
     };
 
     window.abrirLixeira = () => {
@@ -390,7 +441,7 @@
         lista.innerHTML = "";
         devedores.filter(d => d.removida).forEach(d => {
             lista.innerHTML += `<div style="border-bottom:1px solid #eee; padding:15px; font-size:13px;"><b>${d.nome} - R$ ${d.valor.toFixed(2)}</b><br>
-<span style="color:var(--danger)">Motivo: ${d.motivoExclusao}</span></div>`;
+            <span style="color:var(--danger)">Motivo: ${d.motivoExclusao}</span> | <small>Por: ${d.quemExcluiu}</small></div>`;
         });
         document.getElementById('modalLixeira').style.display = 'block';
     };
