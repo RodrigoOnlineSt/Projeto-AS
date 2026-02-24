@@ -29,77 +29,46 @@
     .btn-main { background: var(--primary); color: white; font-weight: 600; cursor: pointer; border: none; }
     .btn-main:active { transform: scale(0.95); }
 
+    .cliente-group { background: white; border: 1px solid var(--border); border-radius: 12px; margin-bottom: 10px; overflow: hidden; }
+    .cliente-header { padding: 16px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-left: 6px solid var(--danger); transition: 0.2s; }
+    .cliente-header:hover { background: #f8fafc; }
+
     .devedor { 
       background: white; padding: 16px; border-radius: 12px; border: 1px solid var(--border); 
       border-left: 6px solid var(--danger); margin-bottom: 12px; 
-      transition: all 0.5s cubic-bezier(0.68, -0.55, 0.27, 1.55); 
-      position: relative; animation: slideIn 0.4s ease-out forwards;
+      transition: all 0.3s ease; position: relative; animation: slideIn 0.4s ease-out forwards;
     }
 
-    @keyframes slideIn { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 
-    .status-processando { 
-        border-left-color: var(--primary) !important; background: #eff6ff !important; 
-        transform: scale(0.98); opacity: 0.8; pointer-events: none;
-    }
-    
+    .status-processando { border-left-color: var(--primary) !important; background: #eff6ff !important; opacity: 0.8; pointer-events: none; }
     .status-pago { border-left-color: var(--success) !important; }
-    .selecionado-soma { background: #fff7ed !important; border-color: var(--warning) !important; border-left-color: var(--warning) !important; transform: scale(1.02); box-shadow: 0 5px 15px rgba(245, 158, 11, 0.2); }
+    .selecionado-soma { background: #fff7ed !important; border-color: var(--warning) !important; border-left-color: var(--warning) !important; transform: scale(1.01); }
     
-    .info { font-size: 12px; color: var(--text-muted); margin: 8px 0; line-height: 1.5; }
-    
+    .info { font-size: 11px; color: var(--text-muted); margin: 8px 0; line-height: 1.4; }
     .actions { display: flex; gap: 8px; margin-top: 10px; }
-    .btn-action { 
-        padding: 10px 16px; border-radius: 8px; border: none; 
-        font-size: 12px; font-weight: 700; cursor: pointer; 
-        transition: 0.2s; display: flex; align-items: center; gap: 5px;
-    }
+    .btn-action { padding: 10px 16px; border-radius: 8px; border: none; font-size: 12px; font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 5px; }
     .btn-pagar-card { background: var(--primary); color: white; }
-    .btn-pagar-card:hover { background: #1d4ed8; }
     .btn-excluir-ui { background: #fee2e2; color: #991b1b; }
 
-    .spinner {
-      width: 14px; height: 14px; border: 2px solid #ffffff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite;
-    }
+    .spinner { width: 14px; height: 14px; border: 2px solid #ffffff; border-bottom-color: transparent; border-radius: 50%; display: inline-block; animation: rotation 1s linear infinite; }
     @keyframes rotation { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    #btnLixeira { background: white; color: var(--text-main); border: 1px solid var(--border); }
     #modalLixeira { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.9); z-index:3000; padding:20px; box-sizing:border-box; overflow-y:auto; backdrop-filter: blur(5px); }
+    #somaBar { display:none; position:fixed; bottom:0; left:0; width:100%; background: #1e293b; color: white; padding: 25px; z-index: 2000; box-sizing: border-box; border-radius: 24px 24px 0 0; }
 
-    #somaBar { display:none; position:fixed; bottom:0; left:0; width:100%; background: #1e293b; color: white; padding: 25px; z-index: 2000; box-sizing: border-box; border-radius: 24px 24px 0 0; box-shadow: 0 -10px 25px rgba(0,0,0,0.2); animation: slideUp 0.4s ease-out; }
-    @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-
-    /* ESTILOS RELATÓRIO */
-    .btn-relatorio {
-        background: var(--success); color: white; border: none;
-        border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer;
-        transition: 0.3s; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.2);
-        display: flex; align-items: center; justify-content: center; gap: 8px;
-        flex: 1; height: 45px;
-    }
-    .btn-relatorio:hover { background: #16a34a; transform: translateY(-2px); }
-
-    .modal-full { 
-        display:none; position:fixed; top:0; left:0; width:100%; height:100%; 
-        background:rgba(15, 23, 42, 0.9); z-index:4000; padding:15px; box-sizing:border-box;
-        backdrop-filter: blur(8px);
-    }
-    .modal-content {
-        max-width: 500px; margin: auto; background: white; border-radius: 20px; 
-        padding: 20px; position: relative; max-height: 90vh; overflow-y: auto;
-    }
-    .repasse-card { background: #f0fdf4; border: 2px dashed #22c55e; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
-    .extrato-item { display: flex; justify-content: space-between; padding: 8px; border-bottom: 1px solid #f1f5f9; font-size: 11px; }
-
+    .btn-relatorio { background: var(--success); color: white; border: none; border-radius: 12px; font-weight: 800; font-size: 13px; cursor: pointer; flex: 1; height: 45px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .modal-full { display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(15, 23, 42, 0.9); z-index:4000; padding:15px; box-sizing:border-box; backdrop-filter: blur(8px); }
+    .modal-content { max-width: 500px; margin: auto; background: white; border-radius: 20px; padding: 20px; position: relative; max-height: 90vh; overflow-y: auto; }
+    
     .hidden { display: none !important; }
+    #btnVoltar { background: #64748b; color: white; margin-bottom: 15px; display: none; }
   </style>
 </head>
 <body>
 
 <div class="container">
-    <div style="display:flex; justify-content: center; align-items: center;">
-        <h2>Pendências</h2>
-    </div>
+    <h2>Pendências</h2>
 
     <div id="login-section" class="form-group">
         <select id="funcionario" style="flex:1">
@@ -122,23 +91,24 @@
     </div>
 
     <div id="area-restrita" class="hidden">
-        <div class="form-group" style="background: #fff5f5; padding: 10px; border-radius: 12px; border: 1px solid #feb2b2; margin-bottom: 10px;">
+        <button id="btnVoltar" class="btn-main" onclick="fecharFoco()"><i class="fa-solid fa-arrow-left"></i> VOLTAR À LISTA</button>
+
+        <div id="form-anotar" class="form-group" style="background: #fff5f5; padding: 10px; border-radius: 12px; border: 1px solid #feb2b2; margin-bottom: 10px;">
             <input type="text" id="nomeCliente" placeholder="Nome do Cliente" style="flex:2">
             <input type="text" id="valorMask" placeholder="R$ 0,00" style="flex:1" oninput="mascaraMoeda(this)">
             <button class="btn-main" style="background: var(--danger)" onclick="adicionarDivida()">ANOTAR</button>
         </div>
 
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <button id="btnSomar" class="btn-main" style="flex: 1; background: var(--warning); border-radius: 12px; height: 45px; font-size: 13px;">
+            <button id="btnSomar" class="btn-main" style="flex: 1; background: var(--warning); border-radius: 12px; height: 45px; font-size: 13px;" onclick="ativarSoma()">
                 <i class="fa-solid fa-calculator"></i> MODO SOMA
             </button>
-            
             <button class="btn-relatorio" onclick="abrirRelatorio()">
                 <i class="fa-solid fa-chart-line"></i> RELATÓRIO
             </button>
         </div>
 
-        <div class="tabs">
+        <div class="tabs" id="abas-filtro">
             <button id="tabPendentes" class="tab active" onclick="setFiltro('pendente', this)">PENDENTES</button>
             <button id="tabPagos" class="tab" onclick="setFiltro('pago', this)">PAGOS</button>
         </div>
@@ -155,76 +125,46 @@
             <h3 style="margin:0; font-size:18px; color:var(--primary)"><i class="fa-solid fa-cash-register"></i> Relatório de Caixa</h3>
             <p id="subtituloRelatorio" style="font-size:11px; color:var(--text-muted); margin:5px 0; font-weight: bold;"></p>
         </div>
-        
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-            <div>
-                <label style="font-size:10px; font-weight:bold; color:var(--text-muted)">INÍCIO:</label>
-                <input type="date" id="dataInicio" style="width:100%; border: 1px solid #cbd5e1; padding: 5px; border-radius: 5px;">
-            </div>
-            <div>
-                <label style="font-size:10px; font-weight:bold; color:var(--text-muted)">FIM:</label>
-                <input type="date" id="dataFim" style="width:100%; border: 1px solid #cbd5e1; padding: 5px; border-radius: 5px;">
-            </div>
+            <div><label style="font-size:10px; font-weight:bold;">INÍCIO:</label><input type="date" id="dataInicio" style="width:100%; padding:5px;"></div>
+            <div><label style="font-size:10px; font-weight:bold;">FIM:</label><input type="date" id="dataFim" style="width:100%; padding:5px;"></div>
         </div>
-
-        <div id="filtroAdm" class="hidden" style="margin-bottom: 15px; padding: 10px; background: #f1f5f9; border-radius: 10px;">
-            <label style="font-size:10px; font-weight:800; color:var(--primary); display:block; margin-bottom:5px;">FILTRAR REPASSE DE:</label>
-            <select id="filtroFuncionarioAdm" onchange="calcularDesempenho()" style="width:100%; padding:8px; border-radius:8px; border:1px solid #cbd5e1;">
-                <option value="TODOS">--- TODOS OS RECEBIDOS ---</option>
-                <option value="Karolina">Karolina</option>
+        <div id="filtroAdm" class="hidden" style="margin-bottom:15px; padding:10px; background:#f1f5f9; border-radius:10px;">
+            <select id="filtroFuncionarioAdm" onchange="calcularDesempenho()" style="width:100%; padding:8px;">
+                <option value="TODOS">--- TODOS ---</option>
+                <option value="Karol">Karol</option>
                 <option value="Rodrigo">Rodrigo</option>
                 <option value="Gabriela">Gabriela</option>
-                <option value="ADM">ADM</option>
             </select>
         </div>
-
-        <div class="repasse-card" style="margin-bottom: 10px;">
-            <small id="labelRepasse" style="font-weight:800; color:#166534; font-size:10px; text-transform: uppercase;">TOTAL A REPASSAR (GERAL):</small>
+        <div style="background:#f0fdf4; border:2px dashed #22c55e; padding:15px; border-radius:12px; text-align:center; margin-bottom:10px;">
+            <small id="labelRepasse" style="font-weight:800; font-size:10px;">TOTAL A REPASSAR:</small>
             <span id="resRepasse" style="color:#15803d; font-size:28px; font-weight:900; display:block;">R$ 0,00</span>
         </div>
-
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-            <div style="background: #eff6ff; border-left: 4px solid #3b82f6; padding: 10px; border-radius: 8px;">
-                <small style="font-size:9px; font-weight:800; color:#1d4ed8; text-transform:uppercase;">Próprios</small>
-                <span id="resRecebidoProprio" style="display:block; font-weight:900; color:#1e40af; font-size:14px;">R$ 0,00</span>
-            </div>
-            <div style="background: #fff7ed; border-left: 4px solid #f97316; padding: 10px; border-radius: 8px;">
-                <small style="font-size:9px; font-weight:800; color:#c2410c; text-transform:uppercase;">De Terceiros</small>
-                <span id="resRecebidoOutros" style="display:block; font-weight:900; color:#9a3412; font-size:14px;">R$ 0,00</span>
-            </div>
+        <div id="res-adicionais" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div style="background:#eff6ff; padding:10px; border-radius:8px;"><small>Próprios</small><span id="resRecebidoProprio" style="display:block; font-weight:900;">R$ 0,00</span></div>
+            <div style="background:#fff7ed; padding:10px; border-radius:8px;"><small>Terceiros</small><span id="resRecebidoOutros" style="display:block; font-weight:900;">R$ 0,00</span></div>
         </div>
-
-        <div style="background: #fef2f2; border-left: 4px solid #ef4444; padding: 8px 10px; border-radius: 8px; margin-bottom: 10px;">
-            <small style="font-size:9px; font-weight:800; color:#991b1b; text-transform:uppercase;">Total que Anotou no Fiado</small>
-            <span id="resAnotado" style="display:block; font-weight:900; color:#b91c1c; font-size:14px;">R$ 0,00</span>
-        </div>
-
-        <div style="padding: 5px 0;">
-            <small style="font-weight:800; color:#64748b; font-size:10px;">EXTRATO DE RECEBIMENTOS:</small>
-            <div id="extratoRecebidos" style="margin-top:5px; max-height: 150px; overflow-y: auto; border: 1px solid #e2e8f0; border-radius: 8px; background:#fff;"></div>
-        </div>
-        
+        <div style="background:#fef2f2; padding:10px; border-radius:8px; margin-bottom:10px;"><small>Total Anotado no Fiado</small><span id="resAnotado" style="display:block; font-weight:900;">R$ 0,00</span></div>
+        <div id="extratoRecebidos" style="max-height:150px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;"></div>
         <div style="display:flex; gap:10px; margin-top:15px;">
-            <button onclick="document.getElementById('modalDesempenho').style.display='none'" style="flex:1; padding:12px; border-radius:8px; border:none; background:#64748b; color:white; font-weight:bold;">FECHAR</button>
-            <button id="btnHoje" style="flex:1; padding:12px; border-radius:8px; border:none; background:var(--primary); color:white; font-weight:bold;">HOJE</button>
+            <button onclick="document.getElementById('modalDesempenho').style.display='none'" style="flex:1; padding:12px; background:#64748b; color:white; border-radius:8px; border:none; font-weight:bold;">FECHAR</button>
+            <button id="btnHoje" style="flex:1; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none; font-weight:bold;">HOJE</button>
         </div>
     </div>
 </div>
 
 <div id="modalLixeira">
     <div style="max-width:600px; margin:auto; background:white; border-radius:20px; padding:25px;">
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-            <h3 style="margin:0; color:var(--danger)"><i class="fa-solid fa-shield-halved"></i> Auditoria de Exclusões</h3>
-            <button onclick="document.getElementById('modalLixeira').style.display='none'" class="btn-action" style="background:#f1f5f9">Fechar</button>
-        </div>
+        <h3 style="color:var(--danger)">Auditoria de Exclusões</h3>
         <div id="listaLixeira"></div>
+        <button onclick="document.getElementById('modalLixeira').style.display='none'" class="btn-main" style="width:100%; margin-top:15px;">FECHAR</button>
     </div>
 </div>
 
 <div id="somaBar">
     <div style="max-width:700px; margin:auto; display:flex; justify-content:space-between; align-items:center;">
-        <div><small style="color:#94a3b8">TOTAL SELECIONADO</small><br>
-        <strong id="totalSoma" style="font-size:26px; color:#4ade80">R$ 0,00</strong></div>
+        <div><small>TOTAL SELECIONADO</small><br><strong id="totalSoma" style="font-size:26px; color:#4ade80">R$ 0,00</strong></div>
         <div style="display:flex; gap:12px;">
             <button class="btn-main" id="confirmarSoma" style="background:var(--success); padding: 15px 20px;">LIQUIDAR</button>
             <button class="btn-action" id="encerrarSoma" style="background:#475569; color:white">CANCELAR</button>
@@ -252,14 +192,13 @@
     let modoSoma = false;
     let selecionados = new Set();
     let totalSoma = 0;
+    let clienteEmFoco = null;
     const usuarioLogado = localStorage.getItem("usuarioAtual");
 
     window.mascaraMoeda = (i) => {
         let v = i.value.replace(/\D/g,'');
         v = (v/100).toFixed(2) + '';
         v = v.replace(".", ",");
-        v = v.replace(/(\d)(\d{3})(\d{3}),/g, "$1.$2.$3,");
-        v = v.replace(/(\d)(\d{3}),/g, "$1.$2,");
         i.value = "R$ " + v;
     };
 
@@ -285,12 +224,7 @@
         
         onSnapshot(query(collection(db, "dividas"), orderBy("dataDevendo", "desc")), (snap) => {
             devedores = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-            devedores.sort((a, b) => {
-                if (a.pago && b.pago) return new Date(b.dataPago) - new Date(a.dataPago);
-                return 0;
-            });
             atualizarLista();
-            if (document.getElementById('modalDesempenho').style.display === 'block') calcularDesempenho();
         });
     }
 
@@ -298,63 +232,154 @@
         filtroAtual = f;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
+        // Esconder botão de soma se for para aba de pagos
+        document.getElementById("btnSomar").style.display = (f === 'pago') ? 'none' : 'block';
+        fecharFoco();
+    };
+
+    window.fecharFoco = () => {
+        clienteEmFoco = null;
+        modoSoma = false;
+        selecionados.clear();
+        totalSoma = 0;
+        document.getElementById("somaBar").style.display = "none";
+        document.getElementById("btnVoltar").style.display = "none";
+        document.getElementById("form-anotar").classList.remove("hidden");
+        document.getElementById("abas-filtro").classList.remove("hidden");
+        atualizarLista();
+    };
+
+    window.focarCliente = (nome) => {
+        clienteEmFoco = nome;
+        document.getElementById("btnVoltar").style.display = "block";
+        document.getElementById("form-anotar").classList.add("hidden");
+        document.getElementById("abas-filtro").classList.add("hidden");
+        atualizarLista();
+    };
+
+    window.ativarSoma = () => {
+        if (!clienteEmFoco) { alert("Selecione um cliente primeiro para somar as dívidas dele."); return; }
+        modoSoma = true;
+        document.getElementById("somaBar").style.display = "block";
         atualizarLista();
     };
 
     window.atualizarLista = () => {
         const lista = document.getElementById("lista");
         lista.innerHTML = "";
-        const filtrados = devedores.filter(d => {
+        
+        const agora = new Date();
+        const limiteQuinzeDias = 15 * 24 * 60 * 60 * 1000;
+
+        // Ativos já vêm ordenados por dataDevendo desc do Firebase
+        const ativos = devedores.filter(d => {
             if (d.removida) return false;
-            const bateFiltro = filtroAtual === 'pago' ? d.pago : !d.pago;
-            return (bateFiltro || processandoIds.has(d.id));
-        });
-        filtrados.forEach(d => {
-            const card = document.createElement("div");
-            const estaProcessando = processandoIds.has(d.id);
-            const estaSelecionado = selecionados.has(d.id);
-            card.className = `devedor ${d.pago ? 'status-pago' : ''} ${estaProcessando ? 'status-processando' : ''} ${estaSelecionado ? 'selecionado-soma' : ''}`;
-            card.innerHTML = `
-                <div style="display:flex; justify-content:space-between; align-items:center">
-                    <strong style="font-size:16px">${d.nome}</strong>
-                    <span style="font-weight:800; font-size:18px; color:${estaProcessando ? 'var(--primary)' : 'inherit'}">R$ ${Number(d.valor).toFixed(2).replace('.', ',')}</span>
-                </div>
-                <div class="info">
-                    <span><i class="fa-solid fa-user-pen"></i> Anotado por: ${d.funcionario}</span><br>
-                    <span><i class="fa-solid fa-calendar-plus"></i> ${new Date(d.dataDevendo).toLocaleString('pt-BR')}</span>
-                    ${d.pago && !estaProcessando ? `<div style="color:var(--success); margin-top:8px; font-weight:600;"><i class="fa-solid fa-check-circle"></i> Recebido por: ${d.quemPagou} em ${new Date(d.dataPago).toLocaleString('pt-BR')}</div>` : ''}
-                </div>
-                ${!d.pago && !modoSoma ? `<div class="actions"><button class="btn-action btn-pagar-card" onclick="acaoPagar('${d.id}')">${estaProcessando ? '<span class="spinner"></span>' : 'PAGAR'}</button><button class="btn-action btn-excluir-ui" onclick="acaoExcluir('${d.id}')"><i class="fa-solid fa-trash"></i></button></div>` : ''}
-            `;
-            if (modoSoma && !d.pago && !estaProcessando) {
-                card.onclick = () => {
-                    if (selecionados.has(d.id)) { selecionados.delete(d.id); totalSoma -= d.valor; }
-                    else { selecionados.add(d.id); totalSoma += d.valor; }
-                    document.getElementById("totalSoma").innerText = "R$ " + totalSoma.toFixed(2).replace('.', ',');
-                    atualizarLista();
-                };
+            const isPago = d.pago === true;
+            if (isPago) {
+                const dataPagamento = new Date(d.dataPago);
+                if (agora - dataPagamento > limiteQuinzeDias) return false;
             }
-            lista.appendChild(card);
+            return (filtroAtual === 'pago' ? isPago : !isPago);
         });
+
+        if (!clienteEmFoco) {
+            // Agrupar clientes mantendo a ordem da dívida mais recente
+            const gruposMap = new Map();
+            ativos.forEach(d => {
+                if (!gruposMap.has(d.nome)) {
+                    gruposMap.set(d.nome, { total: 0, qtd: 0, ultimaData: d.dataDevendo });
+                }
+                const g = gruposMap.get(d.nome);
+                g.total += d.valor;
+                g.qtd++;
+            });
+
+            gruposMap.forEach((dados, nome) => {
+                const card = document.createElement("div");
+                card.className = "cliente-group";
+                card.innerHTML = `
+                    <div class="cliente-header" onclick="focarCliente('${nome}')">
+                        <div><strong style="font-size:16px">${nome}</strong><br><small>${dados.qtd} item(ns)</small></div>
+                        <span style="font-weight:800; font-size:18px; color:${filtroAtual==='pago'?'var(--success)':'var(--danger)'}">R$ ${dados.total.toFixed(2).replace('.', ',')}</span>
+                    </div>`;
+                lista.appendChild(card);
+            });
+        } else {
+            const devedorItens = ativos.filter(d => d.nome === clienteEmFoco);
+            devedorItens.forEach(d => {
+                const card = document.createElement("div");
+                const estaProcessando = processandoIds.has(d.id);
+                const estaSelecionado = selecionados.has(d.id);
+                card.className = `devedor ${d.pago ? 'status-pago' : ''} ${estaProcessando ? 'status-processando' : ''} ${estaSelecionado ? 'selecionado-soma' : ''}`;
+                
+                let detalhesHtml = `<div class="info">
+                    <i class="fa-solid fa-pen"></i> Anotado por: <b>${d.funcionario}</b> em ${new Date(d.dataDevendo).toLocaleString('pt-BR')}
+                </div>`;
+
+                if (d.pago) {
+                    detalhesHtml += `<div class="info" style="color:var(--success); border-top:1px solid #eee; padding-top:5px; margin-top:5px;">
+                        <i class="fa-solid fa-check-double"></i> Recebido por: <b>${d.quemPagou}</b> em ${new Date(d.dataPago).toLocaleString('pt-BR')}
+                    </div>`;
+                }
+
+                // Lógica de permissão de exclusão: Vagner exclui tudo. Outros só o que eles mesmos anotaram.
+                const podeExcluir = (usuarioLogado === "Vagner" || d.funcionario === usuarioLogado);
+
+                card.innerHTML = `
+                    <div style="display:flex; justify-content:space-between; align-items:center">
+                        <strong style="font-size:14px">${clienteEmFoco}</strong>
+                        <span style="font-weight:800; font-size:16px;">R$ ${Number(d.valor).toFixed(2).replace('.', ',')}</span>
+                    </div>
+                    ${detalhesHtml}
+                    ${!d.pago && !modoSoma ? `
+                        <div class="actions">
+                            <button class="btn-action btn-pagar-card" onclick="acaoPagar('${d.id}')">${estaProcessando ? '<span class="spinner"></span>' : 'PAGAR'}</button>
+                            ${podeExcluir ? `<button class="btn-action btn-excluir-ui" onclick="acaoExcluir('${d.id}', '${d.funcionario}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+                        </div>` : ''}
+                `;
+
+                if (modoSoma) {
+                    card.onclick = () => {
+                        if (selecionados.has(d.id)) { selecionados.delete(d.id); totalSoma -= d.valor; }
+                        else { selecionados.add(d.id); totalSoma += d.valor; }
+                        document.getElementById("totalSoma").innerText = "R$ " + totalSoma.toFixed(2).replace('.', ',');
+                        atualizarLista();
+                    };
+                }
+                lista.appendChild(card);
+            });
+        }
     };
 
     window.acaoPagar = async (id) => {
         processandoIds.add(id); atualizarLista();
         setTimeout(async () => {
-            try {
-                await updateDoc(doc(db, "dividas", id), { pago: true, quemPagou: usuarioLogado, dataPago: new Date().toISOString() });
-            } finally { processandoIds.delete(id); atualizarLista(); }
-        }, 4000);
+            try { await updateDoc(doc(db, "dividas", id), { pago: true, quemPagou: usuarioLogado, dataPago: new Date().toISOString() }); }
+            finally { processandoIds.delete(id); atualizarLista(); }
+        }, 3000);
     };
 
-    window.acaoExcluir = async (id) => {
-        let motivo = usuarioLogado === "Vagner" ? "Excluído por ADM" : prompt("JUSTIFIQUE:");
-        if (motivo) await updateDoc(doc(db, "dividas", id), { removida: true, motivoExclusao: motivo, quemExcluiu: usuarioLogado, dataApagada: new Date().toISOString() });
+    window.acaoExcluir = async (id, donoDaDivida) => {
+        let motivo = "";
+        // Se não for o ADM, exige justificativa
+        if (usuarioLogado !== "Vagner") {
+            motivo = prompt("JUSTIFIQUE O MOTIVO DA EXCLUSÃO:");
+            if (!motivo) return; // Cancela se não justificar
+        } else {
+            motivo = "Excluído pelo Administrador";
+        }
+        
+        await updateDoc(doc(db, "dividas", id), { 
+            removida: true, 
+            motivoExclusao: motivo, 
+            quemExcluiu: usuarioLogado, 
+            dataApagada: new Date().toISOString() 
+        });
     };
 
     window.adicionarDivida = async () => {
         const n = document.getElementById("nomeCliente").value.trim();
-        const vRaw = document.getElementById("valorMask").value.replace("R$ ", "").replace(".", "").replace(",", ".");
+        const vRaw = document.getElementById("valorMask").value.replace("R$ ", "").replace(",", ".");
         const v = parseFloat(vRaw);
         if (n && !isNaN(v)) await addDoc(collection(db, "dividas"), { nome: n, valor: v, funcionario: usuarioLogado, dataDevendo: new Date().toISOString(), pago: false, removida: false });
         document.getElementById("nomeCliente").value = ""; document.getElementById("valorMask").value = "";
@@ -365,7 +390,7 @@
         document.getElementById('dataInicio').value = hoje;
         document.getElementById('dataFim').value = hoje;
         document.getElementById('modalDesempenho').style.display = 'block';
-        calcularDesempenho();
+        window.calcularDesempenho();
     };
 
     window.calcularDesempenho = () => {
@@ -373,93 +398,48 @@
         const fim = new Date(document.getElementById('dataFim').value + 'T23:59:59');
         const extrato = document.getElementById('extratoRecebidos');
         extrato.innerHTML = "";
-
-        let totalAnotado = 0;       
-        let totalProprio = 0;       
-        let totalOutros = 0;        
-
-        const modoADM = (usuarioLogado === "Vagner");
-        let funcAlvo = modoADM ? document.getElementById('filtroFuncionarioAdm').value : usuarioLogado;
-        
-        document.getElementById('subtituloRelatorio').innerText = modoADM ? "PAINEL ADMINISTRATIVO" : `RELATÓRIO: ${usuarioLogado.toUpperCase()}`;
-        document.getElementById('labelRepasse').innerText = (modoADM && funcAlvo !== "TODOS") ? `REPASSE DE ${funcAlvo}:` : "TOTAL A REPASSAR (GERAL):";
+        let tAnotado = 0, tProprio = 0, tOutros = 0;
+        let funcAlvo = (usuarioLogado === "Vagner") ? document.getElementById('filtroFuncionarioAdm').value : usuarioLogado;
 
         devedores.forEach(d => {
             if (d.removida) return;
-            const dataCriacao = new Date(d.dataDevendo);
-            const dataPagamento = d.pago ? new Date(d.dataPago) : null;
-
-            // Lógica de Soma de Anotações (Fiado feito no período)
-            // Se for ADM vendo "TODOS", soma tudo. Se selecionou alguém, soma só o que aquele alguém anotou.
-            if ((funcAlvo === "TODOS" || d.funcionario === funcAlvo) && dataCriacao >= inicio && dataCriacao <= fim) {
-                totalAnotado += d.valor;
-            }
-
-            // Lógica de Soma de Recebimentos (Dinheiro que entrou no período)
-            if (d.pago && (funcAlvo === "TODOS" || d.quemPagou === funcAlvo) && dataPagamento >= inicio && dataPagamento <= fim) {
-                const ehProprio = d.funcionario === d.quemPagou;
-                const cor = ehProprio ? "#2563eb" : "#f97316";
-                const bg = ehProprio ? "#eff6ff" : "#fff7ed";
-
-                if (ehProprio) totalProprio += d.valor;
-                else totalOutros += d.valor;
-
-                extrato.innerHTML += `
-                    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px; border-bottom:1px solid #f1f5f9; background:${bg}; font-size:10px;">
-                        <div>
-                            <b style="color:${cor}">${d.nome}</b><br>
-                            <small style="color:#64748b">Anotado por: ${d.funcionario} | Rec. por: ${d.quemPagou}</small>
-                        </div>
-                        <div style="text-align:right">
-                            <strong style="color:${cor}">+ R$ ${d.valor.toFixed(2).replace('.', ',')}</strong><br>
-                            <small style="color:#94a3b8; font-size:9px;">${new Date(d.dataPago).toLocaleDateString('pt-BR')}</small>
-                        </div>
-                    </div>`;
+            const dCriacao = new Date(d.dataDevendo);
+            if ((funcAlvo === "TODOS" || d.funcionario === funcAlvo) && dCriacao >= inicio && dCriacao <= fim) tAnotado += d.valor;
+            if (d.pago) {
+                const dPago = new Date(d.dataPago);
+                if ((funcAlvo === "TODOS" || d.quemPagou === funcAlvo) && dPago >= inicio && dPago <= fim) {
+                    if (d.funcionario === d.quemPagou) tProprio += d.valor; else tOutros += d.valor;
+                    extrato.innerHTML += `<div style="padding:8px; border-bottom:1px solid #eee; font-size:11px;"><b>${d.nome}</b> - R$ ${d.valor.toFixed(2)}<br><small>Rec: ${d.quemPagou} | ${dPago.toLocaleString('pt-BR')}</small></div>`;
+                }
             }
         });
-
-        const totalGeral = totalProprio + totalOutros;
-        document.getElementById('resAnotado').innerText = "R$ " + totalAnotado.toFixed(2).replace('.', ',');
-        document.getElementById('resRecebidoProprio').innerText = "R$ " + totalProprio.toFixed(2).replace('.', ',');
-        document.getElementById('resRecebidoOutros').innerText = "R$ " + totalOutros.toFixed(2).replace('.', ',');
-        document.getElementById('resRepasse').innerText = "R$ " + totalGeral.toFixed(2).replace('.', ',');
-
-        if (extrato.innerHTML === "") extrato.innerHTML = "<p style='font-size:10px; padding:20px; color:#64748b; text-align:center;'>Sem dados no período.</p>";
+        document.getElementById('resAnotado').innerText = "R$ " + tAnotado.toFixed(2).replace('.', ',');
+        document.getElementById('resRecebidoProprio').innerText = "R$ " + tProprio.toFixed(2).replace('.', ',');
+        document.getElementById('resRecebidoOutros').innerText = "R$ " + tOutros.toFixed(2).replace('.', ',');
+        document.getElementById('resRepasse').innerText = "R$ " + (tProprio + tOutros).toFixed(2).replace('.', ',');
     };
 
     document.getElementById('dataInicio').onchange = window.calcularDesempenho;
     document.getElementById('dataFim').onchange = window.calcularDesempenho;
-    document.getElementById('btnHoje').onclick = () => {
-        const hoje = new Date().toISOString().split('T')[0];
-        document.getElementById('dataInicio').value = hoje;
-        document.getElementById('dataFim').value = hoje;
-        window.calcularDesempenho();
-    };
 
     window.abrirLixeira = () => {
         const lista = document.getElementById('listaLixeira');
         lista.innerHTML = "";
         devedores.filter(d => d.removida).forEach(d => {
-            lista.innerHTML += `<div style="border-bottom:1px solid #eee; padding:15px; font-size:13px;"><b>${d.nome} - R$ ${d.valor.toFixed(2)}</b><br>
-            <span style="color:var(--danger)">Motivo: ${d.motivoExclusao}</span> | <small>Por: ${d.quemExcluiu}</small></div>`;
+            lista.innerHTML += `<div style="border-bottom:1px solid #eee; padding:10px;"><b>${d.nome}</b> - R$ ${d.valor.toFixed(2)}<br><small>Motivo: ${d.motivoExclusao} | Por: ${d.quemExcluiu}</small></div>`;
         });
         document.getElementById('modalLixeira').style.display = 'block';
     };
 
-    document.getElementById("btnSomar").onclick = () => {
-        modoSoma = !modoSoma; selecionados.clear(); totalSoma = 0;
-        document.getElementById("somaBar").style.display = modoSoma ? "block" : "none";
-        atualizarLista();
-    };
-    
     document.getElementById("confirmarSoma").onclick = async () => {
         if(selecionados.size === 0) return;
-        const ids = [...selecionados];
-        ids.forEach(id => acaoPagar(id));
+        [...selecionados].forEach(id => acaoPagar(id));
         modoSoma = false; document.getElementById("somaBar").style.display = "none";
     };
 
-    document.getElementById("encerrarSoma").onclick = () => { modoSoma = false; document.getElementById("somaBar").style.display = "none"; atualizarLista(); };
+    document.getElementById("encerrarSoma").onclick = () => { 
+        modoSoma = false; document.getElementById("somaBar").style.display = "none"; atualizarLista(); 
+    };
 </script>
 </body>
 </html>
