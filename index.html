@@ -63,6 +63,7 @@
     
     .hidden { display: none !important; }
     #btnVoltar { background: #64748b; color: white; margin-bottom: 15px; display: none; }
+    .obs-text { display: block; background: #fffbeb; color: #92400e; padding: 4px 8px; border-radius: 6px; font-size: 11px; margin: 5px 0; border: 1px solid #fef3c7; font-weight: 600; }
   </style>
 </head>
 <body>
@@ -93,10 +94,15 @@
     <div id="area-restrita" class="hidden">
         <button id="btnVoltar" class="btn-main" onclick="fecharFoco()"><i class="fa-solid fa-arrow-left"></i> VOLTAR À LISTA</button>
 
-        <div id="form-anotar" class="form-group" style="background: #fff5f5; padding: 10px; border-radius: 12px; border: 1px solid #feb2b2; margin-bottom: 10px;">
-            <input type="text" id="nomeCliente" placeholder="Nome do Cliente" style="flex:2">
-            <input type="text" id="valorMask" placeholder="R$ 0,00" style="flex:1" oninput="mascaraMoeda(this)">
-            <button class="btn-main" style="background: var(--danger)" onclick="adicionarDivida()">ANOTAR</button>
+        <div id="form-anotar" style="background: #fff5f5; padding: 12px; border-radius: 12px; border: 1px solid #feb2b2; margin-bottom: 10px;">
+            <div class="form-group">
+                <input type="text" id="nomeCliente" placeholder="Nome do Cliente" style="flex:2">
+                <input type="text" id="valorMask" placeholder="R$ 0,00" style="flex:1" oninput="mascaraMoeda(this)">
+            </div>
+            <div class="form-group" style="margin-bottom: 0;">
+                <input type="text" id="observacao" placeholder="Observação (Ex: deixou, faltou e etc)" style="flex:1">
+                <button class="btn-main" style="background: var(--danger)" onclick="adicionarDivida()">ANOTAR</button>
+            </div>
         </div>
 
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
@@ -164,7 +170,8 @@
 
 <div id="somaBar">
     <div style="max-width:700px; margin:auto; display:flex; justify-content:space-between; align-items:center;">
-        <div><small>TOTAL SELECIONADO</small><br><strong id="totalSoma" style="font-size:26px; color:#4ade80">R$ 0,00</strong></div>
+        <div><small>TOTAL SELECIONADO</small><br>
+<strong id="totalSoma" style="font-size:26px; color:#4ade80">R$ 0,00</strong></div>
         <div style="display:flex; gap:12px;">
             <button class="btn-main" id="confirmarSoma" style="background:var(--success); padding: 15px 20px;">LIQUIDAR</button>
             <button class="btn-action" id="encerrarSoma" style="background:#475569; color:white">CANCELAR</button>
@@ -232,7 +239,6 @@
         filtroAtual = f;
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         el.classList.add('active');
-        // Esconder botão de soma se for para aba de pagos
         document.getElementById("btnSomar").style.display = (f === 'pago') ? 'none' : 'block';
         fecharFoco();
     };
@@ -271,7 +277,6 @@
         const agora = new Date();
         const limiteQuinzeDias = 15 * 24 * 60 * 60 * 1000;
 
-        // Ativos já vêm ordenados por dataDevendo desc do Firebase
         const ativos = devedores.filter(d => {
             if (d.removida) return false;
             const isPago = d.pago === true;
@@ -283,7 +288,6 @@
         });
 
         if (!clienteEmFoco) {
-            // Agrupar clientes mantendo a ordem da dívida mais recente
             const gruposMap = new Map();
             ativos.forEach(d => {
                 if (!gruposMap.has(d.nome)) {
@@ -299,7 +303,8 @@
                 card.className = "cliente-group";
                 card.innerHTML = `
                     <div class="cliente-header" onclick="focarCliente('${nome}')">
-                        <div><strong style="font-size:16px">${nome}</strong><br><small>${dados.qtd} item(ns)</small></div>
+                        <div><strong style="font-size:16px">${nome}</strong><br>
+<small>${dados.qtd} item(ns)</small></div>
                         <span style="font-weight:800; font-size:18px; color:${filtroAtual==='pago'?'var(--success)':'var(--danger)'}">R$ ${dados.total.toFixed(2).replace('.', ',')}</span>
                     </div>`;
                 lista.appendChild(card);
@@ -322,7 +327,6 @@
                     </div>`;
                 }
 
-                // Lógica de permissão de exclusão: Vagner exclui tudo. Outros só o que eles mesmos anotaram.
                 const podeExcluir = (usuarioLogado === "Vagner" || d.funcionario === usuarioLogado);
 
                 card.innerHTML = `
@@ -330,6 +334,7 @@
                         <strong style="font-size:14px">${clienteEmFoco}</strong>
                         <span style="font-weight:800; font-size:16px;">R$ ${Number(d.valor).toFixed(2).replace('.', ',')}</span>
                     </div>
+                    ${d.observacao ? `<span class="obs-text"><i class="fa-solid fa-comment-dots"></i> ${d.observacao}</span>` : ''}
                     ${detalhesHtml}
                     ${!d.pago && !modoSoma ? `
                         <div class="actions">
@@ -361,10 +366,9 @@
 
     window.acaoExcluir = async (id, donoDaDivida) => {
         let motivo = "";
-        // Se não for o ADM, exige justificativa
         if (usuarioLogado !== "Vagner") {
             motivo = prompt("JUSTIFIQUE O MOTIVO DA EXCLUSÃO:");
-            if (!motivo) return; // Cancela se não justificar
+            if (!motivo) return;
         } else {
             motivo = "Excluído pelo Administrador";
         }
@@ -379,10 +383,21 @@
 
     window.adicionarDivida = async () => {
         const n = document.getElementById("nomeCliente").value.trim();
+        const obs = document.getElementById("observacao").value.trim();
         const vRaw = document.getElementById("valorMask").value.replace("R$ ", "").replace(",", ".");
         const v = parseFloat(vRaw);
-        if (n && !isNaN(v)) await addDoc(collection(db, "dividas"), { nome: n, valor: v, funcionario: usuarioLogado, dataDevendo: new Date().toISOString(), pago: false, removida: false });
-        document.getElementById("nomeCliente").value = ""; document.getElementById("valorMask").value = "";
+        if (n && !isNaN(v)) await addDoc(collection(db, "dividas"), { 
+            nome: n, 
+            observacao: obs,
+            valor: v, 
+            funcionario: usuarioLogado, 
+            dataDevendo: new Date().toISOString(), 
+            pago: false, 
+            removida: false 
+        });
+        document.getElementById("nomeCliente").value = ""; 
+        document.getElementById("observacao").value = "";
+        document.getElementById("valorMask").value = "";
     };
 
     window.abrirRelatorio = () => {
@@ -409,7 +424,8 @@
                 const dPago = new Date(d.dataPago);
                 if ((funcAlvo === "TODOS" || d.quemPagou === funcAlvo) && dPago >= inicio && dPago <= fim) {
                     if (d.funcionario === d.quemPagou) tProprio += d.valor; else tOutros += d.valor;
-                    extrato.innerHTML += `<div style="padding:8px; border-bottom:1px solid #eee; font-size:11px;"><b>${d.nome}</b> - R$ ${d.valor.toFixed(2)}<br><small>Rec: ${d.quemPagou} | ${dPago.toLocaleString('pt-BR')}</small></div>`;
+                    extrato.innerHTML += `<div style="padding:8px; border-bottom:1px solid #eee; font-size:11px;"><b>${d.nome}</b> - R$ ${d.valor.toFixed(2)}<br>
+<small>Rec: ${d.quemPagou} | ${dPago.toLocaleString('pt-BR')}</small></div>`;
                 }
             }
         });
@@ -426,7 +442,8 @@
         const lista = document.getElementById('listaLixeira');
         lista.innerHTML = "";
         devedores.filter(d => d.removida).forEach(d => {
-            lista.innerHTML += `<div style="border-bottom:1px solid #eee; padding:10px;"><b>${d.nome}</b> - R$ ${d.valor.toFixed(2)}<br><small>Motivo: ${d.motivoExclusao} | Por: ${d.quemExcluiu}</small></div>`;
+            lista.innerHTML += `<div style="border-bottom:1px solid #eee; padding:10px;"><b>${d.nome}</b> - R$ ${d.valor.toFixed(2)}<br>
+<small>Motivo: ${d.motivoExclusao} | Por: ${d.quemExcluiu}</small></div>`;
         });
         document.getElementById('modalLixeira').style.display = 'block';
     };
