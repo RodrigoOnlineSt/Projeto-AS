@@ -65,7 +65,6 @@
     #btnVoltar { background: #64748b; color: white; margin-bottom: 15px; display: none; width: 100%; }
     .obs-text { display: block; background: #fffbeb; color: #92400e; padding: 4px 8px; border-radius: 6px; font-size: 11px; margin: 5px 0; border: 1px solid #fef3c7; font-weight: 600; }
 
-    /* Estilo Destacado para o Formulário Rápido */
     #form-rapido { 
         background: #dbeafe; 
         padding: 15px; 
@@ -176,6 +175,11 @@
         </div>
         <div style="background:#fef2f2; padding:10px; border-radius:8px; margin-bottom:10px;"><small>Total Anotado no Fiado</small><span id="resAnotado" style="display:block; font-weight:900;">R$ 0,00</span></div>
         <div id="extratoRecebidos" style="max-height:150px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;"></div>
+        
+        <button onclick="enviarWhatsApp()" class="btn-main" style="width:100%; margin-top:15px; background:#25d366; display:flex; align-items:center; justify-content:center; gap:10px; height:50px; font-size:16px;">
+            <i class="fa-brands fa-whatsapp" style="font-size:20px;"></i> ENVIAR WHATSAPP
+        </button>
+
         <div style="display:flex; gap:10px; margin-top:15px;">
             <button onclick="document.getElementById('modalDesempenho').style.display='none'" style="flex:1; padding:12px; background:#64748b; color:white; border-radius:8px; border:none; font-weight:bold;">FECHAR</button>
             <button id="btnHoje" style="flex:1; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none; font-weight:bold;">HOJE</button>
@@ -225,6 +229,8 @@
     let clienteEmFoco = null;
     const usuarioLogado = localStorage.getItem("usuarioAtual");
 
+    let valAnotado = 0, valProprio = 0, valOutros = 0, valRepasse = 0;
+
     window.mascaraMoeda = (i) => {
         let v = i.value.replace(/\D/g,'');
         v = (v/100).toFixed(2) + '';
@@ -255,6 +261,22 @@
         onSnapshot(query(collection(db, "dividas"), orderBy("dataDevendo", "desc")), (snap) => {
             devedores = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             atualizarLista();
+            
+            // Relatório automático no primeiro login do dia
+            const hoje = new Date().toISOString().split('T')[0];
+            const chaveRelatorio = `relatorioEnviado_${usuarioLogado}_${hoje}`;
+            if (!localStorage.getItem(chaveRelatorio)) {
+                // Prepara os dados primeiro
+                document.getElementById('dataInicio').value = hoje;
+                document.getElementById('dataFim').value = hoje;
+                window.calcularDesempenho();
+                
+                // Envia para o WhatsApp automaticamente
+                window.enviarWhatsApp();
+                
+                // Marca como enviado
+                localStorage.setItem(chaveRelatorio, "true");
+            }
         });
     }
 
@@ -429,7 +451,6 @@
         }
     };
 
-    // Função Rapida Destacada com Correção
     window.adicionarDividaRapida = () => {
         window.adicionarDivida(null, 'valorRapido', 'obsRapida');
     };
@@ -447,26 +468,52 @@
         const fim = new Date(document.getElementById('dataFim').value + 'T23:59:59');
         const extrato = document.getElementById('extratoRecebidos');
         extrato.innerHTML = "";
-        let tAnotado = 0, tProprio = 0, tOutros = 0;
+        
+        valAnotado = 0; valProprio = 0; valOutros = 0;
         let funcAlvo = (usuarioLogado === "Vagner") ? document.getElementById('filtroFuncionarioAdm').value : usuarioLogado;
 
         devedores.forEach(d => {
             if (d.removida) return;
             const dCriacao = new Date(d.dataDevendo);
-            if ((funcAlvo === "TODOS" || d.funcionario === funcAlvo) && dCriacao >= inicio && dCriacao <= fim) tAnotado += d.valor;
+            if ((funcAlvo === "TODOS" || d.funcionario === funcAlvo) && dCriacao >= inicio && dCriacao <= fim) valAnotado += d.valor;
             if (d.pago) {
                 const dPago = new Date(d.dataPago);
                 if ((funcAlvo === "TODOS" || d.quemPagou === funcAlvo) && dPago >= inicio && dPago <= fim) {
-                    if (d.funcionario === d.quemPagou) tProprio += d.valor; else tOutros += d.valor;
+                    if (d.funcionario === d.quemPagou) valProprio += d.valor; else valOutros += d.valor;
                     extrato.innerHTML += `<div style="padding:8px; border-bottom:1px solid #eee; font-size:11px;"><b>${d.nome}</b> - R$ ${d.valor.toFixed(2)}<br>
                     <small>Rec: ${d.quemPagou} | ${dPago.toLocaleString('pt-BR')}</small></div>`;
                 }
             }
         });
-        document.getElementById('resAnotado').innerText = "R$ " + tAnotado.toFixed(2).replace('.', ',');
-        document.getElementById('resRecebidoProprio').innerText = "R$ " + tProprio.toFixed(2).replace('.', ',');
-        document.getElementById('resRecebidoOutros').innerText = "R$ " + tOutros.toFixed(2).replace('.', ',');
-        document.getElementById('resRepasse').innerText = "R$ " + (tProprio + tOutros).toFixed(2).replace('.', ',');
+        
+        valRepasse = valProprio + valOutros;
+        document.getElementById('resAnotado').innerText = "R$ " + valAnotado.toFixed(2).replace('.', ',');
+        document.getElementById('resRecebidoProprio').innerText = "R$ " + valProprio.toFixed(2).replace('.', ',');
+        document.getElementById('resRecebidoOutros').innerText = "R$ " + valOutros.toFixed(2).replace('.', ',');
+        document.getElementById('resRepasse').innerText = "R$ " + valRepasse.toFixed(2).replace('.', ',');
+    };
+
+    window.enviarWhatsApp = () => {
+        const dIni = document.getElementById('dataInicio').value.split('-').reverse().join('/');
+        const dFim = document.getElementById('dataFim').value.split('-').reverse().join('/');
+        const funcionario = (usuarioLogado === "Vagner") ? document.getElementById('filtroFuncionarioAdm').value : usuarioLogado;
+        
+        const texto = `📌 *RELATÓRIO DE CAIXA* %0A` +
+                      `👤 *${funcionario}* %0A` +
+                      `📅 ${dIni} até ${dFim} %0A%0A` +
+                      `*TOTAL A REPASSAR:* %0A` +
+                      `*R$ ${valRepasse.toFixed(2).replace('.', ',')}* %0A` +
+                      `.................... %0A%0A` +
+                      `*Próprios que recebi:* %0A` +
+                      `R$ ${valProprio.toFixed(2).replace('.', ',')} %0A` +
+                      `................... %0A` +
+                      `*Recebi anotado por Terceiros:* %0A` +
+                      `R$ ${valOutros.toFixed(2).replace('.', ',')} %0A` +
+                      `.................... %0A` +
+                      `*Total Anotado no Fiado:* %0A` +
+                      `R$ ${valAnotado.toFixed(2).replace('.', ',')}`;
+
+        window.open(`https://api.whatsapp.com/send?phone=5583996323995&text=${texto}`, '_blank');
     };
 
     document.getElementById('dataInicio').onchange = window.calcularDesempenho;
@@ -484,12 +531,42 @@
 
     document.getElementById("confirmarSoma").onclick = async () => {
         if(selecionados.size === 0) return;
-        [...selecionados].forEach(id => acaoPagar(id));
-        modoSoma = false; document.getElementById("somaBar").style.display = "none";
+        const idsParaPagar = Array.from(selecionados);
+        const btnConfirmar = document.getElementById("confirmarSoma");
+        btnConfirmar.disabled = true;
+        btnConfirmar.innerHTML = '<span class="spinner"></span>...';
+        try {
+            const promessas = idsParaPagar.map(id => 
+                updateDoc(doc(db, "dividas", id), { 
+                    pago: true, 
+                    quemPagou: usuarioLogado, 
+                    dataPago: new Date().toISOString() 
+                })
+            );
+            await Promise.all(promessas);
+            selecionados.clear();
+            totalSoma = 0;
+            modoSoma = false;
+            document.getElementById("somaBar").style.display = "none";
+            atualizarLista();
+        } catch (error) {
+            console.error(error);
+            alert("Erro ao liquidar.");
+        } finally {
+            btnConfirmar.disabled = false;
+            btnConfirmar.innerText = "LIQUIDAR";
+        }
     };
 
     document.getElementById("encerrarSoma").onclick = () => { 
         modoSoma = false; document.getElementById("somaBar").style.display = "none"; atualizarLista(); 
+    };
+
+    document.getElementById("btnHoje").onclick = () => {
+        const hoje = new Date().toISOString().split('T')[0];
+        document.getElementById('dataInicio').value = hoje;
+        document.getElementById('dataFim').value = hoje;
+        window.calcularDesempenho();
     };
 </script>
 </body>
