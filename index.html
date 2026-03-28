@@ -101,14 +101,13 @@
     </div>
 
     <div id="area-restrita" class="hidden">
-        
         <div id="form-anotar" style="background: #fff5f5; padding: 12px; border-radius: 12px; border: 1px solid #feb2b2; margin-bottom: 10px;">
             <div class="form-group">
                 <input type="text" id="nomeCliente" placeholder="Nome do Cliente" style="flex:2">
                 <input type="tel" inputmode="decimal" id="valorMask" placeholder="R$ 0,00" style="flex:1" oninput="mascaraMoeda(this)">
             </div>
             <div class="form-group" style="margin-bottom: 0;">
-                <input type="text" id="observacao" placeholder="Observação (Ex: deixou, faltou e etc)" style="flex:1">
+                <input type="text" id="observacao" placeholder="Observação" style="flex:1">
                 <button class="btn-main" style="background: var(--danger)" onclick="adicionarDivida('nomeCliente', 'valorMask', 'observacao')">ANOTAR</button>
             </div>
         </div>
@@ -198,7 +197,7 @@
 <div id="somaBar">
     <div style="max-width:700px; margin:auto; display:flex; justify-content:space-between; align-items:center;">
         <div><small>TOTAL SELECIONADO</small><br>
-<strong id="totalSoma" style="font-size:26px; color:#4ade80">R$ 0,00</strong></div>
+        <strong id="totalSoma" style="font-size:26px; color:#4ade80">R$ 0,00</strong></div>
         <div style="display:flex; gap:12px;">
             <button class="btn-main" id="confirmarSoma" style="background:var(--success); padding: 15px 20px;">LIQUIDAR</button>
             <button class="btn-action" id="encerrarSoma" style="background:#475569; color:white">CANCELAR</button>
@@ -262,20 +261,27 @@
             devedores = snap.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             atualizarLista();
             
-            // Relatório automático no primeiro login do dia
-            const hoje = new Date().toISOString().split('T')[0];
-            const chaveRelatorio = `relatorioEnviado_${usuarioLogado}_${hoje}`;
+            // Lógica de Relatório Automático (Vendas de ONTEM enviadas HOJE)
+            const hojeData = new Date();
+            const hojeChave = hojeData.toISOString().split('T')[0];
+            const chaveRelatorio = `rel_ontem_enviado_${usuarioLogado}_${hojeChave}`;
+
             if (!localStorage.getItem(chaveRelatorio)) {
-                // Prepara os dados primeiro
-                document.getElementById('dataInicio').value = hoje;
-                document.getElementById('dataFim').value = hoje;
-                window.calcularDesempenho();
+                // Definir ONTEM
+                const ontem = new Date();
+                ontem.setDate(hojeData.getDate() - 1);
+                const ontemFormatado = ontem.toISOString().split('T')[0];
+
+                // Simula preenchimento do modal para o cálculo
+                document.getElementById('dataInicio').value = ontemFormatado;
+                document.getElementById('dataFim').value = ontemFormatado;
                 
-                // Envia para o WhatsApp automaticamente
-                window.enviarWhatsApp();
-                
-                // Marca como enviado
-                localStorage.setItem(chaveRelatorio, "true");
+                // Calcula e envia
+                setTimeout(() => {
+                    window.calcularDesempenho();
+                    window.enviarWhatsApp();
+                    localStorage.setItem(chaveRelatorio, "true");
+                }, 1500); // Pequeno delay para garantir carregamento dos dados
             }
         });
     }
@@ -312,7 +318,7 @@
     };
 
     window.ativarSoma = () => {
-        if (!clienteEmFoco) { alert("Selecione um cliente primeiro para somar as dívidas dele."); return; }
+        if (!clienteEmFoco) { alert("Selecione um cliente."); return; }
         modoSoma = true;
         document.getElementById("somaBar").style.display = "block";
         atualizarLista();
@@ -338,7 +344,7 @@
             const gruposMap = new Map();
             ativos.forEach(d => {
                 if (!gruposMap.has(d.nome)) {
-                    gruposMap.set(d.nome, { total: 0, qtd: 0, ultimaData: d.dataDevendo });
+                    gruposMap.set(d.nome, { total: 0, qtd: 0 });
                 }
                 const g = gruposMap.get(d.nome);
                 g.total += d.valor;
@@ -364,14 +370,9 @@
                 const estaSelecionado = selecionados.has(d.id);
                 card.className = `devedor ${d.pago ? 'status-pago' : ''} ${estaProcessando ? 'status-processando' : ''} ${estaSelecionado ? 'selecionado-soma' : ''}`;
                 
-                let detalhesHtml = `<div class="info">
-                    <i class="fa-solid fa-pen"></i> Anotado por: <b>${d.funcionario}</b> em ${new Date(d.dataDevendo).toLocaleString('pt-BR')}
-                </div>`;
-
+                let detalhesHtml = `<div class="info"><i class="fa-solid fa-pen"></i> ${d.funcionario} - ${new Date(d.dataDevendo).toLocaleString('pt-BR')}</div>`;
                 if (d.pago) {
-                    detalhesHtml += `<div class="info" style="color:var(--success); border-top:1px solid #eee; padding-top:5px; margin-top:5px;">
-                        <i class="fa-solid fa-check-double"></i> Recebido por: <b>${d.quemPagou}</b> em ${new Date(d.dataPago).toLocaleString('pt-BR')}
-                    </div>`;
+                    detalhesHtml += `<div class="info" style="color:var(--success)"><i class="fa-solid fa-check"></i> ${d.quemPagou} - ${new Date(d.dataPago).toLocaleString('pt-BR')}</div>`;
                 }
 
                 const podeExcluir = (usuarioLogado === "Vagner" || d.funcionario === usuarioLogado);
@@ -381,12 +382,12 @@
                         <strong style="font-size:14px">${clienteEmFoco}</strong>
                         <span style="font-weight:800; font-size:16px;">R$ ${Number(d.valor).toFixed(2).replace('.', ',')}</span>
                     </div>
-                    ${d.observacao ? `<span class="obs-text"><i class="fa-solid fa-comment-dots"></i> ${d.observacao}</span>` : ''}
+                    ${d.observacao ? `<span class="obs-text">${d.observacao}</span>` : ''}
                     ${detalhesHtml}
                     ${!d.pago && !modoSoma ? `
                         <div class="actions">
                             <button class="btn-action btn-pagar-card" onclick="acaoPagar('${d.id}')">${estaProcessando ? '<span class="spinner"></span>' : 'PAGAR'}</button>
-                            ${podeExcluir ? `<button class="btn-action btn-excluir-ui" onclick="acaoExcluir('${d.id}', '${d.funcionario}')"><i class="fa-solid fa-trash"></i></button>` : ''}
+                            ${podeExcluir ? `<button class="btn-action btn-excluir-ui" onclick="acaoExcluir('${d.id}')"><i class="fa-solid fa-trash"></i></button>` : ''}
                         </div>` : ''}
                 `;
 
@@ -411,20 +412,10 @@
         }, 3000);
     };
 
-    window.acaoExcluir = async (id, donoDaDivida) => {
-        let motivo = "";
-        if (usuarioLogado !== "Vagner") {
-            motivo = prompt("JUSTIFIQUE O MOTIVO DA EXCLUSÃO:");
-            if (!motivo) return;
-        } else {
-            motivo = "Excluído pelo Administrador";
-        }
-        await updateDoc(doc(db, "dividas", id), { 
-            removida: true, 
-            motivoExclusao: motivo, 
-            quemExcluiu: usuarioLogado, 
-            dataApagada: new Date().toISOString() 
-        });
+    window.acaoExcluir = async (id) => {
+        let motivo = (usuarioLogado === "Vagner") ? "Admin" : prompt("MOTIVO:");
+        if (!motivo) return;
+        await updateDoc(doc(db, "dividas", id), { removida: true, motivoExclusao: motivo, quemExcluiu: usuarioLogado, dataApagada: new Date().toISOString() });
     };
 
     window.adicionarDivida = async (idNome, idValor, idObs) => {
@@ -432,28 +423,14 @@
         const obs = document.getElementById(idObs).value.trim();
         const vRaw = document.getElementById(idValor).value.replace("R$ ", "").replace(",", ".");
         const v = parseFloat(vRaw);
-        
         if (n && !isNaN(v)) {
-            await addDoc(collection(db, "dividas"), { 
-                nome: n, 
-                observacao: obs,
-                valor: v, 
-                funcionario: usuarioLogado, 
-                dataDevendo: new Date().toISOString(), 
-                pago: false, 
-                removida: false 
-            });
+            await addDoc(collection(db, "dividas"), { nome: n, observacao: obs, valor: v, funcionario: usuarioLogado, dataDevendo: new Date().toISOString(), pago: false, removida: false });
             if(idNome) document.getElementById(idNome).value = ""; 
-            document.getElementById(idObs).value = "";
-            document.getElementById(idValor).value = "";
-        } else {
-            alert("Preencha o valor corretamente.");
+            document.getElementById(idObs).value = ""; document.getElementById(idValor).value = "";
         }
     };
 
-    window.adicionarDividaRapida = () => {
-        window.adicionarDivida(null, 'valorRapido', 'obsRapida');
-    };
+    window.adicionarDividaRapida = () => window.adicionarDivida(null, 'valorRapido', 'obsRapida');
 
     window.abrirRelatorio = () => {
         const hoje = new Date().toISOString().split('T')[0];
@@ -468,7 +445,6 @@
         const fim = new Date(document.getElementById('dataFim').value + 'T23:59:59');
         const extrato = document.getElementById('extratoRecebidos');
         extrato.innerHTML = "";
-        
         valAnotado = 0; valProprio = 0; valOutros = 0;
         let funcAlvo = (usuarioLogado === "Vagner") ? document.getElementById('filtroFuncionarioAdm').value : usuarioLogado;
 
@@ -480,12 +456,10 @@
                 const dPago = new Date(d.dataPago);
                 if ((funcAlvo === "TODOS" || d.quemPagou === funcAlvo) && dPago >= inicio && dPago <= fim) {
                     if (d.funcionario === d.quemPagou) valProprio += d.valor; else valOutros += d.valor;
-                    extrato.innerHTML += `<div style="padding:8px; border-bottom:1px solid #eee; font-size:11px;"><b>${d.nome}</b> - R$ ${d.valor.toFixed(2)}<br>
-                    <small>Rec: ${d.quemPagou} | ${dPago.toLocaleString('pt-BR')}</small></div>`;
+                    extrato.innerHTML += `<div style="padding:8px; border-bottom:1px solid #eee; font-size:11px;"><b>${d.nome}</b> - R$ ${d.valor.toFixed(2)}</div>`;
                 }
             }
         });
-        
         valRepasse = valProprio + valOutros;
         document.getElementById('resAnotado').innerText = "R$ " + valAnotado.toFixed(2).replace('.', ',');
         document.getElementById('resRecebidoProprio').innerText = "R$ " + valProprio.toFixed(2).replace('.', ',');
@@ -498,21 +472,16 @@
         const dFim = document.getElementById('dataFim').value.split('-').reverse().join('/');
         const funcionario = (usuarioLogado === "Vagner") ? document.getElementById('filtroFuncionarioAdm').value : usuarioLogado;
         
-        const texto = `📌 *RELATÓRIO DE CAIXA* %0A` +
+        const texto = `📌 *RELATÓRIO DE CAIXA (ONTEM)* %0A` +
                       `👤 *${funcionario}* %0A` +
-                      `📅 ${dIni} até ${dFim} %0A%0A` +
+                      `📅 ${dIni} %0A%0A` +
                       `*TOTAL A REPASSAR:* %0A` +
                       `*R$ ${valRepasse.toFixed(2).replace('.', ',')}* %0A` +
-                      `.................... %0A%0A` +
-                      `*Próprios que recebi:* %0A` +
-                      `R$ ${valProprio.toFixed(2).replace('.', ',')} %0A` +
-                      `................... %0A` +
-                      `*Recebi anotado por Terceiros:* %0A` +
-                      `R$ ${valOutros.toFixed(2).replace('.', ',')} %0A` +
                       `.................... %0A` +
                       `*Total Anotado no Fiado:* %0A` +
                       `R$ ${valAnotado.toFixed(2).replace('.', ',')}`;
 
+        // Abre em nova aba automaticamente
         window.open(`https://api.whatsapp.com/send?phone=5583996323995&text=${texto}`, '_blank');
     };
 
@@ -523,51 +492,18 @@
         const lista = document.getElementById('listaLixeira');
         lista.innerHTML = "";
         devedores.filter(d => d.removida).forEach(d => {
-            lista.innerHTML += `<div style="border-bottom:1px solid #eee; padding:10px;"><b>${d.nome}</b> - R$ ${d.valor.toFixed(2)}<br>
-<small>Motivo: ${d.motivoExclusao} | Por: ${d.quemExcluiu}</small></div>`;
+            lista.innerHTML += `<div style="padding:10px; border-bottom:1px solid #eee;">${d.nome} - R$ ${d.valor}</div>`;
         });
         document.getElementById('modalLixeira').style.display = 'block';
     };
 
     document.getElementById("confirmarSoma").onclick = async () => {
-        if(selecionados.size === 0) return;
-        const idsParaPagar = Array.from(selecionados);
-        const btnConfirmar = document.getElementById("confirmarSoma");
-        btnConfirmar.disabled = true;
-        btnConfirmar.innerHTML = '<span class="spinner"></span>...';
-        try {
-            const promessas = idsParaPagar.map(id => 
-                updateDoc(doc(db, "dividas", id), { 
-                    pago: true, 
-                    quemPagou: usuarioLogado, 
-                    dataPago: new Date().toISOString() 
-                })
-            );
-            await Promise.all(promessas);
-            selecionados.clear();
-            totalSoma = 0;
-            modoSoma = false;
-            document.getElementById("somaBar").style.display = "none";
-            atualizarLista();
-        } catch (error) {
-            console.error(error);
-            alert("Erro ao liquidar.");
-        } finally {
-            btnConfirmar.disabled = false;
-            btnConfirmar.innerText = "LIQUIDAR";
-        }
+        const ids = Array.from(selecionados);
+        for(let id of ids) await updateDoc(doc(db, "dividas", id), { pago: true, quemPagou: usuarioLogado, dataPago: new Date().toISOString() });
+        selecionados.clear(); totalSoma = 0; modoSoma = false; document.getElementById("somaBar").style.display = "none";
     };
 
-    document.getElementById("encerrarSoma").onclick = () => { 
-        modoSoma = false; document.getElementById("somaBar").style.display = "none"; atualizarLista(); 
-    };
-
-    document.getElementById("btnHoje").onclick = () => {
-        const hoje = new Date().toISOString().split('T')[0];
-        document.getElementById('dataInicio').value = hoje;
-        document.getElementById('dataFim').value = hoje;
-        window.calcularDesempenho();
-    };
+    document.getElementById("encerrarSoma").onclick = () => { modoSoma = false; document.getElementById("somaBar").style.display = "none"; atualizarLista(); };
 </script>
 </body>
 </html>
