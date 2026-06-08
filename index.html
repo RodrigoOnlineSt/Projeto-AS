@@ -83,6 +83,7 @@
     <div id="login-section" class="form-group">
         <select id="funcionario" style="flex:1">
             <option value="">Nome</option>
+            <option value="Bruna">Bruna</option>
             <option value="Elayne">Elayne</option>
             <option value="Karol">Karol</option>
             <option value="Rodrigo">Rodrigo</option>
@@ -160,6 +161,7 @@
         <div id="filtroAdm" class="hidden" style="margin-bottom:15px; padding:10px; background:#f1f5f9; border-radius:10px;">
             <select id="filtroFuncionarioAdm" onchange="calcularDesempenho()" style="width:100%; padding:8px;">
                 <option value="TODOS">--- TODOS ---</option>
+                <option value="Bruna">Bruna</option>
                 <option value="Elayne">Elayne</option>
                 <option value="Karol">Karol</option>
                 <option value="Rodrigo">Rodrigo</option>
@@ -219,7 +221,7 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
-    const senhas = { Karol: "14", Rodrigo: "04", Gabriela: "66", Vagner: "admin" };
+    const senhas = { Bruna: "17",Elayne: "26",Karol: "14", Rodrigo: "04", Gabriela: "66", Vagner: "admin" };
     
     let devedores = [];
     let filtroAtual = 'pendente';
