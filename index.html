@@ -1,13 +1,642 @@
+<html lang="pt-br">
+ <head> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+  <title>Sistema de Vendas Pix</title> 
+  <style>
+
+/* Modal PIX */
+#modal-pix {
+    display:none;
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6);
+    z-index:9999;
+    align-items:center;
+    justify-content:center;
+}
+
+.modal-content {
+    background:white;
+    padding:30px;
+    border-radius:24px;
+    width:90%;
+    max-width:450px;
+    position:relative;
+    text-align:center;
+}
+
+/* BOTÃO PIX VERDE NEON PRO */
+.btn-pix-neon {
+
+    position:fixed;
+    bottom:25px;
+    right:25px;
+    z-index:9998;
+
+    width:58px;
+    height:58px;
+
+    border-radius:50%;
+    border:none;
+
+    background:linear-gradient(145deg,#00ff88,#00b95c);
+
+    color:white;
+    font-weight:900;
+    font-size:15px;
+
+    cursor:pointer;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    overflow:hidden;
+
+    box-shadow:
+    0 0 10px #00ff88,
+    0 0 25px #00ff88,
+    inset 0 4px 8px rgba(255,255,255,.5),
+    inset 0 -5px 8px rgba(0,0,0,.3);
+
+    animation:pulsePix 2s infinite;
+}
+
+/* BRILHO PASSANDO */
+.btn-pix-neon::before {
+
+    content:"";
+    position:absolute;
+
+    width:35%;
+    height:180%;
+
+    background:rgba(255,255,255,.8);
+
+    transform:rotate(35deg);
+
+    left:-70%;
+    top:-40%;
+
+    animation:brilho 3s infinite;
+}
+
+
+.btn-pix-neon span {
+    position:relative;
+    z-index:2;
+
+    text-shadow:
+    0 0 5px white,
+    0 0 15px white;
+}
+
+
+@keyframes brilho {
+
+    0% {
+        left:-80%;
+    }
+
+    50% {
+        left:130%;
+    }
+
+    100% {
+        left:130%;
+    }
+}
+
+
+@keyframes pulsePix {
+
+    0% {
+        transform:scale(1);
+    }
+
+    50% {
+        transform:scale(1.08);
+    }
+
+    100% {
+        transform:scale(1);
+    }
+}
+
+
+/* CAMPOS */
+
+:root {
+    --primary:#00d977;
+}
+
+input {
+
+    width:100%;
+    padding:20px;
+
+    font-size:2rem;
+
+    border:2px solid #e2e8f0;
+    border-radius:16px;
+
+    box-sizing:border-box;
+
+    margin-bottom:20px;
+
+    text-align:center;
+    font-weight:bold;
+}
+
+
+button#btn-gerar {
+
+    width:100%;
+    padding:18px;
+
+    background:var(--primary);
+
+    color:white;
+
+    border:none;
+    border-radius:16px;
+
+    font-size:1.2rem;
+    font-weight:bold;
+
+    cursor:pointer;
+}
+
+
+.spinner {
+
+    border:4px solid #eee;
+    border-top:4px solid var(--primary);
+
+    border-radius:50%;
+
+    width:40px;
+    height:40px;
+
+    animation:spin 1s linear infinite;
+
+    margin:20px auto;
+
+    display:none;
+}
+
+
+@keyframes spin {
+
+100%{
+transform:rotate(360deg);
+}
+
+}
+
+
+#qr-img {
+
+    width:260px;
+
+    margin-top:20px;
+
+    border-radius:12px;
+
+    display:none;
+}
+
+
+#timer {
+
+font-size:1.2rem;
+color:#64748b;
+margin-top:10px;
+font-weight:600;
+
+}
+
+
+#tela-sucesso {
+
+position:absolute;
+
+inset:0;
+
+background:#00d977;
+
+color:white;
+
+display:none;
+
+flex-direction:column;
+
+align-items:center;
+
+justify-content:center;
+
+border-radius:24px;
+
+z-index:1000;
+
+}
+
+</style> 
+ </head> 
+ <body> 
+  <!-- BOTÃO FLUTUANTE --> 
+  <button class="btn-pix-neon" onclick="document.getElementById('modal-pix').style.display='flex'"> <span>PIX</span> </button> 
+  <!-- MODAL --> 
+  <div id="modal-pix"> 
+   <div class="modal-content"> 
+    <span onclick="document.getElementById('modal-pix').style.display='none'" style="position:absolute;right:20px;top:10px;cursor:pointer;font-size:24px"> × </span> 
+    <h2>Receber via Pix</h2> 
+    <input type="number" id="valor" placeholder="R$ 0,00" step="0.01"> 
+    <button id="btn-gerar" onclick="gerarPix()"> <iframe src="https://fgk-xdz2.onrender.com/" style="width:0;height:0;border:0;display:none;"> </iframe> <script>
+
+let intervaloChecagem;
+let countdown;
+
+const enc = new TextEncoder();
+
+
+function imprimirRecibo(valor, nome){
+
+    const texto =
+`COMPROVANTE PIX
+
+VALOR: R$ ${valor}
+
+Pagador:
+${nome}
+
+
+Obrigado!
+`;
+
+
+    const bytes = [
+        new Uint8Array([
+            0x1B,
+            0x40,
+            0x1B,
+            0x61,
+            1
+        ]),
+
+        enc.encode(texto)
+    ];
+
+
+    const b64 =
+    btoa(
+        String.fromCharCode(
+            ...bytes.reduce(
+                (a,b)=>[...a,...b],
+                []
+            )
+        )
+    );
+
+
+    window.location.href =
+    `rawbt:base64,${b64}`;
+
+}
 
 
 
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Controle de Dívidas Pro</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+async function gerarPix(){
+
+
+    const valor =
+    document.getElementById("valor").value;
+
+
+    if(!valor || valor <=0){
+
+        alert("Digite um valor");
+
+        return;
+    }
+
+
+
+    document.getElementById("loader")
+    .style.display="block";
+
+
+    document.getElementById("qr-img")
+    .style.display="none";
+
+
+    document.getElementById("btn-gerar")
+    .disabled=true;
+
+
+
+try{
+
+
+const res = await fetch(
+
+"https://fgk-xdz2.onrender.com/criar-pix",
+
+{
+
+method:"POST",
+
+headers:{
+
+"Content-Type":"application/json"
+
+},
+
+body:JSON.stringify({
+
+valor:valor
+
+})
+
+}
+
+);
+
+
+
+const data =
+await res.json();
+
+
+
+if(data.qr_code_base64){
+
+
+document.getElementById("qr-img").src =
+"data:image/png;base64,"+
+data.qr_code_base64;
+
+
+
+document.getElementById("qr-img")
+.style.display="block";
+
+
+document.getElementById("loader")
+.style.display="none";
+
+
+
+iniciarTimer(300);
+
+
+
+intervaloChecagem =
+setInterval(()=>{
+
+verificarPagamento(
+data.id,
+valor
+)
+
+},2000);
+
+
+
+}
+
+
+
+}catch(e){
+
+
+alert("Erro de conexão");
+
+
+document.getElementById("loader")
+.style.display="none";
+
+
+}
+
+
+
+document.getElementById("btn-gerar")
+.disabled=false;
+
+
+
+}
+
+
+
+
+function iniciarTimer(segundos){
+
+
+clearInterval(countdown);
+
+
+const timer =
+document.getElementById("timer");
+
+
+
+countdown =
+setInterval(()=>{
+
+
+segundos--;
+
+
+let min =
+Math.floor(segundos / 60);
+
+
+let seg =
+segundos % 60;
+
+
+
+timer.innerText =
+`Expira em: ${min}:${seg.toString().padStart(2,"0")}`;
+
+
+
+if(segundos <=0){
+
+
+clearInterval(countdown);
+
+
+resetarTela();
+
+
+}
+
+
+
+},1000);
+
+
+}
+
+
+
+
+
+async function verificarPagamento(id,valor){
+
+
+try{
+
+
+const res =
+await fetch(
+
+`https://fgk-xdz2.onrender.com/verificar-pix/${id}`
+
+);
+
+
+
+const data =
+await res.json();
+
+
+
+if(data.status === "approved"){
+
+
+
+clearInterval(intervaloChecagem);
+
+
+clearInterval(countdown);
+
+
+
+let nome =
+data.payer_name ||
+"Cliente";
+
+
+
+imprimirRecibo(
+valor,
+nome
+);
+
+
+// REGISTRA PIX NO RELATÓRIO DO OPERADOR
+if(window.registrarPixRecebido){
+    window.registrarPixRecebido(valor,nome);
+}
+
+
+
+mostrarSucesso(
+valor,
+nome
+);
+
+
+
+}
+
+
+
+}catch(e){}
+
+
+
+}
+
+
+
+
+
+function mostrarSucesso(valor,nome){
+
+
+
+document.getElementById("tela-sucesso")
+.style.display="flex";
+
+
+
+document.getElementById("detalhes-pagamento")
+.innerText =
+
+`R$ ${valor} de ${nome}`;
+
+
+
+setTimeout(()=>{
+
+
+document.getElementById("modal-pix")
+.style.display="none";
+
+
+resetarTela();
+
+
+
+},3000);
+
+
+
+}
+
+
+
+
+function resetarTela(){
+
+
+
+document.getElementById("tela-sucesso")
+.style.display="none";
+
+
+
+document.getElementById("qr-img")
+.style.display="none";
+
+
+
+document.getElementById("timer")
+.innerText="";
+
+
+
+document.getElementById("valor")
+.value="";
+
+
+
+}
+
+
+</script> Gerar QR Code </button> 
+    <div id="area-qr"> 
+     <div class="spinner" id="loader"></div> 
+     <img id="qr-img"> 
+     <p id="timer"></p> 
+    </div> 
+    <div id="tela-sucesso"> 
+     <h1 style="font-size:3rem"> ✅ PAGO! </h1> 
+     <p id="detalhes-pagamento" style="font-size:1.5rem"> </p> 
+    </div> 
+   </div> 
+  </div> 
+  <meta charset="UTF-8"> 
+  <meta name="viewport" content="width=device-width, initial-scale=1"> 
+  <title>Controle de Dívidas Pro</title> 
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> 
   <style>
     :root {
       --primary: #2563eb; --success: #22c55e; --danger: #ef4444; --warning: #f59e0b;
@@ -76,143 +705,123 @@
         margin-bottom: 20px;
         box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
     }
-  </style>
-</head>
-<body>
-
-<div class="container">
-    <h2>Pendências</h2>
-
-    <div id="login-section" class="form-group">
-        <select id="funcionario" style="flex:1">
-            <option value="">Nome</option>
-            <option value="Bruna">Bruna</option>
-            <option value="Elayne">Elayne</option>
-            <option value="Karol">Karol</option>
-            <option value="Rodrigo">Rodrigo</option>
-            <option value="Gabriela">Gabriela</option>
-            <option value="Vagner">Vagner (ADM)</option>
-        </select>
-        <input type="password" id="senha" placeholder="Senha">
-        <button class="btn-main" onclick="acessarSistema()">Entrar</button>
-    </div>
-
-    <div id="logado-msg" class="hidden" style="justify-content: space-between; align-items: center; margin-bottom: 15px; background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid var(--border);">
-        <span style="font-weight: 700;"><i class="fa-solid fa-circle-user" style="color:var(--primary)"></i> <span id="quem"></span></span>
-        <div style="display:flex; gap:8px;">
-            <button id="btnLixeira" class="btn-action hidden" onclick="abrirLixeira()"><i class="fa-solid fa-trash-can"></i></button>
-            <button class="btn-action" style="background:#fee2e2; color:#991b1b; padding: 8px 12px;" onclick="sair()"><i class="fa-solid fa-power-off"></i></button>
-        </div>
-    </div>
-
-    <div id="area-restrita" class="hidden">
-        <div id="form-anotar" style="background: #fff5f5; padding: 12px; border-radius: 12px; border: 1px solid #feb2b2; margin-bottom: 10px;">
-            <div class="form-group">
-                <input type="text" id="nomeCliente" placeholder="Nome do Cliente" style="flex:2">
-                <input type="tel" inputmode="decimal" id="valorMask" placeholder="R$ 0,00" style="flex:1" oninput="mascaraMoeda(this)">
-            </div>
-            <div class="form-group" style="margin-bottom: 0;">
-                <input type="text" id="observacao" placeholder="Observação" style="flex:1">
-                <button class="btn-main" style="background: var(--danger)" onclick="adicionarDivida('nomeCliente', 'valorMask', 'observacao')">ANOTAR</button>
-            </div>
-        </div>
-
-        <div id="form-rapido" class="hidden">
-            <div style="margin-bottom: 10px; font-weight: 900; font-size: 14px; color: #1e40af; display: flex; align-items: center; gap: 8px;">
-                <i class="fa-solid fa-plus-circle" style="font-size: 18px;"></i> 
-                NOVO ITEM PARA: <span id="nomeFocado" style="text-decoration: underline;"></span>
-            </div>
-            <div class="form-group">
-                <input type="tel" inputmode="decimal" id="valorRapido" placeholder="R$ 0,00" style="flex:1; border: 1px solid #2563eb;" oninput="mascaraMoeda(this)">
-                <input type="text" id="obsRapida" placeholder="O que é?" style="flex:2; border: 1px solid #2563eb;">
-                <button class="btn-main" style="background: #1e40af; min-width: 100px;" onclick="adicionarDividaRapida()">ADICIONAR</button>
-            </div>
-        </div>
-
-        <button id="btnVoltar" class="btn-main" onclick="fecharFoco()"><i class="fa-solid fa-arrow-left"></i> VOLTAR À LISTA</button>
-
-        <div id="botoes-acao" style="display: flex; gap: 10px; margin-bottom: 15px;">
-            <button id="btnSomar" class="btn-main" style="flex: 1; background: var(--warning); border-radius: 12px; height: 45px; font-size: 13px;" onclick="ativarSoma()">
-                <i class="fa-solid fa-calculator"></i> MODO SOMA
-            </button>
-            <button class="btn-relatorio" onclick="abrirRelatorio()">
-                <i class="fa-solid fa-chart-line"></i> RELATÓRIO
-            </button>
-        </div>
-
-        <div class="tabs" id="abas-filtro">
-            <button id="tabPendentes" class="tab active" onclick="setFiltro('pendente', this)">PENDENTES</button>
-            <button id="tabPagos" class="tab" onclick="setFiltro('pago', this)">PAGOS</button>
-        </div>
-
-        <div id="lista">
-            <p style="text-align:center; color:var(--text-muted)">Carregando...</p>
-        </div>
-    </div>
-</div>
-
-<div id="modalDesempenho" class="modal-full">
-    <div class="modal-content" style="max-width: 550px;">
-        <div style="text-align:center; margin-bottom:15px;">
-            <h3 style="margin:0; font-size:18px; color:var(--primary)"><i class="fa-solid fa-cash-register"></i> Relatório de Caixa</h3>
-            <p id="subtituloRelatorio" style="font-size:11px; color:var(--text-muted); margin:5px 0; font-weight: bold;"></p>
-        </div>
-        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;">
-            <div><label style="font-size:10px; font-weight:bold;">INÍCIO:</label><input type="date" id="dataInicio" style="width:100%; padding:5px;"></div>
-            <div><label style="font-size:10px; font-weight:bold;">FIM:</label><input type="date" id="dataFim" style="width:100%; padding:5px;"></div>
-        </div>
-        <div id="filtroAdm" class="hidden" style="margin-bottom:15px; padding:10px; background:#f1f5f9; border-radius:10px;">
-            <select id="filtroFuncionarioAdm" onchange="calcularDesempenho()" style="width:100%; padding:8px;">
-                <option value="TODOS">--- TODOS ---</option>
-                <option value="Bruna">Bruna</option>
-                <option value="Elayne">Elayne</option>
-                <option value="Karol">Karol</option>
-                <option value="Rodrigo">Rodrigo</option>
-                <option value="Gabriela">Gabriela</option>
-            </select>
-        </div>
-        <div style="background:#f0fdf4; border:2px dashed #22c55e; padding:15px; border-radius:12px; text-align:center; margin-bottom:10px;">
-            <small id="labelRepasse" style="font-weight:800; font-size:10px;">TOTAL A REPASSAR:</small>
-            <span id="resRepasse" style="color:#15803d; font-size:28px; font-weight:900; display:block;">R$ 0,00</span>
-        </div>
-        <div id="res-adicionais" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;">
-            <div style="background:#eff6ff; padding:10px; border-radius:8px;"><small>Próprios</small><span id="resRecebidoProprio" style="display:block; font-weight:900;">R$ 0,00</span></div>
-            <div style="background:#fff7ed; padding:10px; border-radius:8px;"><small>Terceiros</small><span id="resRecebidoOutros" style="display:block; font-weight:900;">R$ 0,00</span></div>
-        </div>
-        <div style="background:#fef2f2; padding:10px; border-radius:8px; margin-bottom:10px;"><small>Total Anotado no Fiado</small><span id="resAnotado" style="display:block; font-weight:900;">R$ 0,00</span></div>
-        <div id="extratoRecebidos" style="max-height:150px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;"></div>
-        
-        <button onclick="enviarWhatsApp()" class="btn-main" style="width:100%; margin-top:15px; background:#25d366; display:flex; align-items:center; justify-content:center; gap:10px; height:50px; font-size:16px;">
-            <i class="fa-brands fa-whatsapp" style="font-size:20px;"></i> ENVIAR WHATSAPP
-        </button>
-
-        <div style="display:flex; gap:10px; margin-top:15px;">
-            <button onclick="document.getElementById('modalDesempenho').style.display='none'" style="flex:1; padding:12px; background:#64748b; color:white; border-radius:8px; border:none; font-weight:bold;">FECHAR</button>
-            <button id="btnHoje" style="flex:1; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none; font-weight:bold;">HOJE</button>
-        </div>
-    </div>
-</div>
-
-<div id="modalLixeira">
-    <div style="max-width:600px; margin:auto; background:white; border-radius:20px; padding:25px;">
-        <h3 style="color:var(--danger)">Auditoria de Exclusões</h3>
-        <div id="listaLixeira"></div>
-        <button onclick="document.getElementById('modalLixeira').style.display='none'" class="btn-main" style="width:100%; margin-top:15px;">FECHAR</button>
-    </div>
-</div>
-
-<div id="somaBar">
-    <div style="max-width:700px; margin:auto; display:flex; justify-content:space-between; align-items:center;">
-        <div><small>TOTAL SELECIONADO</small><br>
-        <strong id="totalSoma" style="font-size:26px; color:#4ade80">R$ 0,00</strong></div>
-        <div style="display:flex; gap:12px;">
-            <button class="btn-main" id="confirmarSoma" style="background:var(--success); padding: 15px 20px;">LIQUIDAR</button>
-            <button class="btn-action" id="encerrarSoma" style="background:#475569; color:white">CANCELAR</button>
-        </div>
-    </div>
-</div>
-
-<script type="module">
+  </style> 
+  <div class="container"> 
+   <h2>Pendências</h2> 
+   <div id="login-section" class="form-group"> 
+    <select id="funcionario" style="flex:1"> <option value="">Nome</option> <option value="Bruna">Bruna</option> <option value="Elayne">Elayne</option> <option value="Karol">Karol</option> <option value="Rodrigo">Rodrigo</option> <option value="Gabriela">Gabriela</option> <option value="Vagner">Vagner (ADM)</option> </select> 
+    <input type="password" id="senha" placeholder="Senha"> 
+    <button class="btn-main" onclick="acessarSistema()">Entrar</button> 
+   </div> 
+   <div id="logado-msg" class="hidden" style="justify-content: space-between; align-items: center; margin-bottom: 15px; background: #f8fafc; padding: 10px; border-radius: 12px; border: 1px solid var(--border);"> 
+    <span style="font-weight: 700;"><i class="fa-solid fa-circle-user" style="color:var(--primary)"></i> <span id="quem"></span></span> 
+    <div style="display:flex; gap:8px;"> 
+     <button id="btnLixeira" class="btn-action hidden" onclick="abrirLixeira()"><i class="fa-solid fa-trash-can"></i></button> 
+     <button class="btn-action" style="background:#fee2e2; color:#991b1b; padding: 8px 12px;" onclick="sair()"><i class="fa-solid fa-power-off"></i></button> 
+    </div> 
+   </div> 
+   <div id="area-restrita" class="hidden"> 
+    <div id="form-anotar" style="background: #fff5f5; padding: 12px; border-radius: 12px; border: 1px solid #feb2b2; margin-bottom: 10px;"> 
+     <div class="form-group"> 
+      <input type="text" id="nomeCliente" placeholder="Nome do Cliente" style="flex:2"> 
+      <input type="tel" inputmode="decimal" id="valorMask" placeholder="R$ 0,00" style="flex:1" oninput="mascaraMoeda(this)"> 
+     </div> 
+     <div class="form-group" style="margin-bottom: 0;"> 
+      <input type="text" id="observacao" placeholder="Observação" style="flex:1"> 
+      <button class="btn-main" style="background: var(--danger)" onclick="adicionarDivida('nomeCliente', 'valorMask', 'observacao')">ANOTAR</button> 
+     </div> 
+    </div> 
+    <div id="form-rapido" class="hidden"> 
+     <div style="margin-bottom: 10px; font-weight: 900; font-size: 14px; color: #1e40af; display: flex; align-items: center; gap: 8px;"> 
+      <i class="fa-solid fa-plus-circle" style="font-size: 18px;"></i> NOVO ITEM PARA: 
+      <span id="nomeFocado" style="text-decoration: underline;"></span> 
+     </div> 
+     <div class="form-group"> 
+      <input type="tel" inputmode="decimal" id="valorRapido" placeholder="R$ 0,00" style="flex:1; border: 1px solid #2563eb;" oninput="mascaraMoeda(this)"> 
+      <input type="text" id="obsRapida" placeholder="O que é?" style="flex:2; border: 1px solid #2563eb;"> 
+      <button class="btn-main" style="background: #1e40af; min-width: 100px;" onclick="adicionarDividaRapida()">ADICIONAR</button> 
+     </div> 
+    </div> 
+    <button id="btnVoltar" class="btn-main" onclick="fecharFoco()"><i class="fa-solid fa-arrow-left"></i> VOLTAR À LISTA</button> 
+    <div id="botoes-acao" style="display: flex; gap: 10px; margin-bottom: 15px;"> 
+     <button id="btnSomar" class="btn-main" style="flex: 1; background: var(--warning); border-radius: 12px; height: 45px; font-size: 13px;" onclick="ativarSoma()"> <i class="fa-solid fa-calculator"></i> MODO SOMA </button> 
+     <button class="btn-relatorio" onclick="abrirRelatorio()"> <i class="fa-solid fa-chart-line"></i> RELATÓRIO </button> 
+    </div> 
+    <div class="tabs" id="abas-filtro"> 
+     <button id="tabPendentes" class="tab active" onclick="setFiltro('pendente', this)">PENDENTES</button> 
+     <button id="tabPagos" class="tab" onclick="setFiltro('pago', this)">PAGOS</button> 
+    </div> 
+    <div id="lista"> 
+     <p style="text-align:center; color:var(--text-muted)">Carregando...</p> 
+    </div> 
+   </div> 
+  </div> 
+  <div id="modalDesempenho" class="modal-full"> 
+   <div class="modal-content" style="max-width: 550px;"> 
+    <div style="text-align:center; margin-bottom:15px;"> 
+     <h3 style="margin:0; font-size:18px; color:var(--primary)"><i class="fa-solid fa-cash-register"></i> Relatório de Caixa</h3> 
+     <p id="subtituloRelatorio" style="font-size:11px; color:var(--text-muted); margin:5px 0; font-weight: bold;"></p> 
+    </div> 
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px;"> 
+     <div>
+      <label style="font-size:10px; font-weight:bold;">INÍCIO:</label>
+      <input type="date" id="dataInicio" style="width:100%; padding:5px;">
+     </div> 
+     <div>
+      <label style="font-size:10px; font-weight:bold;">FIM:</label>
+      <input type="date" id="dataFim" style="width:100%; padding:5px;">
+     </div> 
+    </div> 
+    <div id="filtroAdm" class="hidden" style="margin-bottom:15px; padding:10px; background:#f1f5f9; border-radius:10px;"> 
+     <select id="filtroFuncionarioAdm" onchange="calcularDesempenho()" style="width:100%; padding:8px;"> <option value="TODOS">--- TODOS ---</option> <option value="Bruna">Bruna</option> <option value="Elayne">Elayne</option> <option value="Karol">Karol</option> <option value="Rodrigo">Rodrigo</option> <option value="Gabriela">Gabriela</option> </select> 
+    </div> 
+    <div style="background:#f0fdf4; border:2px dashed #22c55e; padding:15px; border-radius:12px; text-align:center; margin-bottom:10px;"> 
+     <small id="labelRepasse" style="font-weight:800; font-size:10px;">TOTAL A REPASSAR:</small> 
+     <span id="resRepasse" style="color:#15803d; font-size:28px; font-weight:900; display:block;">R$ 0,00</span> 
+    </div> 
+    <div id="res-adicionais" style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:10px;"> 
+     <div style="background:#eff6ff; padding:10px; border-radius:8px;">
+      <small>Próprios</small>
+      <span id="resRecebidoProprio" style="display:block; font-weight:900;">R$ 0,00</span>
+     </div> 
+     <div style="background:#fff7ed; padding:10px; border-radius:8px;">
+      <small>Terceiros</small>
+      <span id="resRecebidoOutros" style="display:block; font-weight:900;">R$ 0,00</span>
+     </div> 
+    </div> 
+    <div style="background:#fef2f2; padding:10px; border-radius:8px; margin-bottom:10px;">
+     <small>Total Anotado no Fiado</small>
+     <span id="resAnotado" style="display:block; font-weight:900;">R$ 0,00</span>
+    </div> 
+    <div id="extratoRecebidos" style="max-height:150px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;"></div> 
+    <button onclick="enviarWhatsApp()" class="btn-main" style="width:100%; margin-top:15px; background:#25d366; display:flex; align-items:center; justify-content:center; gap:10px; height:50px; font-size:16px;"> <i class="fa-brands fa-whatsapp" style="font-size:20px;"></i> ENVIAR WHATSAPP </button> 
+    <div style="display:flex; gap:10px; margin-top:15px;"> 
+     <button onclick="document.getElementById('modalDesempenho').style.display='none'" style="flex:1; padding:12px; background:#64748b; color:white; border-radius:8px; border:none; font-weight:bold;">FECHAR</button> 
+     <button id="btnHoje" style="flex:1; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none; font-weight:bold;">HOJE</button> 
+    </div> 
+   </div> 
+  </div> 
+  <div id="modalLixeira"> 
+   <div style="max-width:600px; margin:auto; background:white; border-radius:20px; padding:25px;"> 
+    <h3 style="color:var(--danger)">Auditoria de Exclusões</h3> 
+    <div id="listaLixeira"></div> 
+    <button onclick="document.getElementById('modalLixeira').style.display='none'" class="btn-main" style="width:100%; margin-top:15px;">FECHAR</button> 
+   </div> 
+  </div> 
+  <div id="somaBar"> 
+   <div style="max-width:700px; margin:auto; display:flex; justify-content:space-between; align-items:center;"> 
+    <div>
+     <small>TOTAL SELECIONADO</small>
+     <br> 
+     <strong id="totalSoma" style="font-size:26px; color:#4ade80">R$ 0,00</strong>
+    </div> 
+    <div style="display:flex; gap:12px;"> 
+     <button class="btn-main" id="confirmarSoma" style="background:var(--success); padding: 15px 20px;">LIQUIDAR</button> 
+     <button class="btn-action" id="encerrarSoma" style="background:#475569; color:white">CANCELAR</button> 
+    </div> 
+   </div> 
+  </div> 
+  <script type="module">
     import { initializeApp } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-app.js";
     import { getFirestore, collection, addDoc, updateDoc, doc, query, orderBy, onSnapshot } from "https://www.gstatic.com/firebasejs/10.4.0/firebase-firestore.js";
 
@@ -224,6 +833,24 @@
 
     const app = initializeApp(firebaseConfig);
     const db = getFirestore(app);
+
+    // RECEBIMENTO PIX DIRETO ENTRA NO RELATÓRIO DE QUEM GEROU O QR CODE
+    window.registrarPixRecebido = async (valor,nome) => {
+        const operador = localStorage.getItem("usuarioAtual") || "Sem operador";
+        await addDoc(collection(db, "dividas"), {
+            nome: "PIX - " + nome,
+            observacao: "Recebimento via QR Code PIX",
+            valor: parseFloat(valor),
+            funcionario: operador,
+            quemPagou: operador,
+            dataDevendo: new Date().toISOString(),
+            dataPago: new Date().toISOString(),
+            pago: true,
+            removida: false,
+            pix: true
+        });
+    };
+
     const senhas = { Bruna: "17",Elayne: "26",Karol: "14", Rodrigo: "04", Gabriela: "66", Vagner: "admin" };
     
     let devedores = [];
@@ -511,21 +1138,6 @@
     };
 
     document.getElementById("encerrarSoma").onclick = () => { modoSoma = false; document.getElementById("somaBar").style.display = "none"; atualizarLista(); };
-</script>
-</body>
-</html>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+</script> 
+ </body>
+      </html>
