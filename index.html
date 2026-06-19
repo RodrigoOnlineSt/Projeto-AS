@@ -726,31 +726,10 @@ document.getElementById("valor")
       <input type="text" id="nomeCliente" placeholder="Nome do Cliente" style="flex:2"> 
       <input type="tel" inputmode="decimal" id="valorMask" placeholder="R$ 0,00" style="flex:1" oninput="mascaraMoeda(this)"> 
      </div> 
-
-
-
-     
      <div class="form-group" style="margin-bottom: 0;"> 
       <input type="text" id="observacao" placeholder="Observação" style="flex:1"> 
-
-
-
-
-     <button class="btn-main" 
-style="
-background: var(--danger);
-width:100px;
-height:42px;
-padding:5px;
-" 
-onclick="adicionarDivida('nomeCliente', 'valorMask', 'observacao')">
-ANOTAR
-</button> 
-    
-
-
-
-     
+      <button class="btn-main" style="background: var(--danger)" onclick="adicionarDivida('nomeCliente', 'valorMask', 'observacao')">ANOTAR</button> 
+     </div> 
     </div> 
     <div id="form-rapido" class="hidden"> 
      <div style="margin-bottom: 10px; font-weight: 900; font-size: 14px; color: #1e40af; display: flex; align-items: center; gap: 8px;"> 
@@ -1161,4 +1140,4 @@ ANOTAR
     document.getElementById("encerrarSoma").onclick = () => { modoSoma = false; document.getElementById("somaBar").style.display = "none"; atualizarLista(); };
 </script> 
  </body>
-      </html>
+</html>
