@@ -264,13 +264,18 @@ const enc = new TextEncoder();
 function imprimirRecibo(valor, nome){
 
     const texto =
-`COMPROVANTE PIX
+`PAGAMENTO REALIZADO COM SUCESSO
 
 VALOR: R$ ${valor}
 
-Pagador:
+PAGADOR:
 ${nome}
 
+VENDEDOR:
+${localStorage.getItem("usuarioAtual") || "Sem operador"}
+
+DATA/HORA:
+${new Date().toLocaleString("pt-BR")}
 
 Obrigado!
 `;
@@ -382,6 +387,10 @@ data.qr_code_base64;
 
 document.getElementById("qr-img")
 .style.display="block";
+
+if(document.getElementById("valor-qr")){
+document.getElementById("valor-qr").innerText="R$ "+valor;
+}
 
 
 document.getElementById("loader")
@@ -625,11 +634,13 @@ document.getElementById("valor")
     <div id="area-qr"> 
      <div class="spinner" id="loader"></div> 
      <img id="qr-img"> 
+     <h1 id="valor-qr" style="font-size:2.5rem;font-weight:900;"></h1> 
      <p id="timer"></p> 
     </div> 
     <div id="tela-sucesso"> 
      <h1 style="font-size:3rem"> ✅ PAGO! </h1> 
      <p id="detalhes-pagamento" style="font-size:1.5rem"> </p> 
+     <button onclick="imprimirRecibo(document.getElementById('valor').value,'Cliente')" style="padding:12px;border-radius:12px;border:0;">SEGUNDA VIA PIX</button> 
     </div> 
    </div> 
   </div> 
@@ -720,6 +731,15 @@ document.getElementById("valor")
      <button class="btn-action" style="background:#fee2e2; color:#991b1b; padding: 8px 12px;" onclick="sair()"><i class="fa-solid fa-power-off"></i></button> 
     </div> 
    </div> 
+   <!-- MENU ADM USUÁRIOS --> 
+   <button id="btnConfigAdm" onclick="abrirMenuUsuarios()" style="display:none;position:fixed;right:15px;top:15px;z-index:5000;border:0;border-radius:50%;width:50px;height:50px;font-size:25px;background:#2563eb;color:white;">⚙️</button> 
+   <div id="menuUsuariosAdm" style="display:none;position:fixed;right:10px;top:75px;background:white;z-index:5000;padding:15px;border-radius:15px;box-shadow:0 0 15px #999;width:280px"> 
+    <h3>⚙️ Usuários ADM</h3> 
+    <input id="novoUser" placeholder="Nome/Login"> 
+    <input id="novaSenha" placeholder="Senha"> 
+    <button class="btn-main" onclick="salvarUsuarioAdm()" style="width:100%">SALVAR USUÁRIO</button> 
+    <div id="listaUsuariosAdm"></div> 
+   </div> 
    <div id="area-restrita" class="hidden"> 
     <div id="form-anotar" style="background: #fff5f5; padding: 12px; border-radius: 12px; border: 1px solid #feb2b2; margin-bottom: 10px;"> 
      <div class="form-group"> 
@@ -728,7 +748,7 @@ document.getElementById("valor")
      </div> 
      <div class="form-group" style="margin-bottom: 0;"> 
       <input type="text" id="observacao" placeholder="Observação" style="flex:1"> 
-      <button class="btn-main" style="background: var(--danger)" onclick="adicionarDivida('nomeCliente', 'valorMask', 'observacao')">ANOTAR</button> 
+      <button class="btn-main" style="background: var(--danger); min-width:120px; height:45px; display:flex; align-items:center; justify-content:center;" onclick="adicionarDivida('nomeCliente', 'valorMask', 'observacao')">ANOTAR</button> 
      </div> 
     </div> 
     <div id="form-rapido" class="hidden"> 
@@ -795,6 +815,7 @@ document.getElementById("valor")
     </div> 
     <div id="extratoRecebidos" style="max-height:150px; overflow-y:auto; border:1px solid #e2e8f0; border-radius:8px;"></div> 
     <button onclick="enviarWhatsApp()" class="btn-main" style="width:100%; margin-top:15px; background:#25d366; display:flex; align-items:center; justify-content:center; gap:10px; height:50px; font-size:16px;"> <i class="fa-brands fa-whatsapp" style="font-size:20px;"></i> ENVIAR WHATSAPP </button> 
+    <button onclick="imprimirRelatorio()" class="btn-main" style="width:100%; margin-top:10px; background:#2563eb; height:50px; font-size:16px;"> 🖨️ IMPRIMIR RELATÓRIO </button> 
     <div style="display:flex; gap:10px; margin-top:15px;"> 
      <button onclick="document.getElementById('modalDesempenho').style.display='none'" style="flex:1; padding:12px; background:#64748b; color:white; border-radius:8px; border:none; font-weight:bold;">FECHAR</button> 
      <button id="btnHoje" style="flex:1; padding:12px; background:var(--primary); color:white; border-radius:8px; border:none; font-weight:bold;">HOJE</button> 
@@ -851,7 +872,7 @@ document.getElementById("valor")
         });
     };
 
-    const senhas = { Bruna: "17",Elayne: "26",Karol: "14", Rodrigo: "04", Gabriela: "66", Vagner: "admin" };
+    let senhas = JSON.parse(localStorage.getItem("usuariosSistema")) || { Bruna: "17",Elayne: "26",Karol: "14", Rodrigo: "04", Gabriela: "66", Vagner: "admin" };
     
     let devedores = [];
     let filtroAtual = 'pendente';
@@ -887,6 +908,7 @@ document.getElementById("valor")
         document.getElementById("area-restrita").classList.remove("hidden");
         document.getElementById("quem").innerText = usuarioLogado;
         if(usuarioLogado === "Vagner") {
+            document.getElementById("btnConfigAdm").style.display="block";
             document.getElementById("btnLixeira").classList.remove("hidden");
             document.getElementById("filtroAdm").classList.remove("hidden");
         }
@@ -1101,6 +1123,14 @@ document.getElementById("valor")
         document.getElementById('resRepasse').innerText = "R$ " + valRepasse.toFixed(2).replace('.', ',');
     };
 
+
+    window.imprimirRelatorio = () => {
+        const operador = localStorage.getItem("usuarioAtual") || "Operador";
+        const texto = `RELATORIO DE CAIXA\n\nVENDEDOR: ${operador}\nDATA: ${new Date().toLocaleString("pt-BR")}\n\nTOTAL A REPASSAR:\n${document.getElementById('resRepasse').innerText}\n\nTOTAL ANOTADO:\n${document.getElementById('resAnotado').innerText}\n`;
+        const b64 = btoa(unescape(encodeURIComponent(texto)));
+        window.location.href = `rawbt:base64,${b64}`;
+    };
+
     window.enviarWhatsApp = () => {
         const dIni = document.getElementById('dataInicio').value.split('-').reverse().join('/');
         const dFim = document.getElementById('dataFim').value.split('-').reverse().join('/');
@@ -1138,6 +1168,40 @@ document.getElementById("valor")
     };
 
     document.getElementById("encerrarSoma").onclick = () => { modoSoma = false; document.getElementById("somaBar").style.display = "none"; atualizarLista(); };
+
+window.abrirMenuUsuarios=()=>{
+ let m=document.getElementById("menuUsuariosAdm");
+ m.style.display=m.style.display==="block"?"none":"block";
+ atualizarUsuariosAdm();
+};
+window.salvarUsuarioAdm=()=>{
+ if(usuarioLogado!=="Vagner")return;
+ let u=document.getElementById("novoUser").value.trim();
+ let se=document.getElementById("novaSenha").value.trim();
+ if(!u||!se)return;
+ senhas[u]=se;
+ localStorage.setItem("usuariosSistema",JSON.stringify(senhas));
+ atualizarUsuariosAdm();
+};
+window.removerUsuarioAdm=(u)=>{
+ if(usuarioLogado!=="Vagner"||u==="Vagner")return;
+ delete senhas[u];
+ localStorage.setItem("usuariosSistema",JSON.stringify(senhas));
+ atualizarUsuariosAdm();
+};
+window.editarUsuarioAdm=(u)=>{
+ document.getElementById("novoUser").value=u;
+ document.getElementById("novaSenha").value=senhas[u];
+};
+window.atualizarUsuariosAdm=()=>{
+ let d=document.getElementById("listaUsuariosAdm");
+ if(!d)return;
+ d.innerHTML="";
+ Object.keys(senhas).forEach(u=>{
+ d.innerHTML+=`<p><b>${u}</b> <button onclick="editarUsuarioAdm('${u}')">✏️</button> <button onclick="removerUsuarioAdm('${u}')">🗑️</button></p>`;
+ });
+};
+
 </script> 
  </body>
-</html>
+ </html>
