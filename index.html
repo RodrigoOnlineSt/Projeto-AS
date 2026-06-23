@@ -1040,6 +1040,10 @@ document.getElementById("valor")
                     </div>
                     ${d.observacao ? `<span class="obs-text">${d.observacao}</span>` : ''}
                     ${detalhesHtml}
+                    ${d.pago && d.pix ? `
+                        <div class="actions">
+                            <button class="btn-action btn-pagar-card" onclick="segundaViaPix('${d.id}')">🖨️ SEGUNDA VIA PIX</button>
+                        </div>` : ''}
                     ${!d.pago && !modoSoma ? `
                         <div class="actions">
                             <button class="btn-action btn-pagar-card" onclick="acaoPagar('${d.id}')">${estaProcessando ? '<span class="spinner"></span>' : 'PAGAR'}</button>
@@ -1058,6 +1062,16 @@ document.getElementById("valor")
                 lista.appendChild(card);
             });
         }
+    };
+
+
+    window.segundaViaPix = (id) => {
+        const p = devedores.find(x => x.id === id);
+        if(!p || !p.pix) return alert("Segunda via disponível apenas para PIX.");
+        imprimirRecibo(
+            Number(p.valor).toFixed(2).replace('.', ','),
+            p.nome.replace("PIX - ","")
+        );
     };
 
     window.acaoPagar = async (id) => {
